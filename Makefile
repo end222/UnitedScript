@@ -25,8 +25,8 @@ LDFLAGS=-L/usr/X11R6/lib -L/usr/local/lib -lm -pthread -lcurl -lX11
 
 all: ${target}
 
-${MAIN}: ${MAIN}.o imageDownloader.o admin.o gestor.o subastador.o monitor.o
-	${CPP} ImageDownloader.o admin.o gestor.o subastador.o monitor.o ${MAIN}.o -o ${MAIN} ${LDFLAGS}
+${MAIN}: ${MAIN}.o imageDownloader.o admin.o gestor.o subastador.o monitor.o Socket.o
+	${CPP} ImageDownloader.o admin.o gestor.o subastador.o monitor.o Socket.o ${MAIN}.o -o ${MAIN} ${LDFLAGS}
 
 ${MAIN}.o: ${MAIN}.cpp 
 	${CPP} -c ${CPPFLAGS} ${MAIN}.cpp
@@ -45,6 +45,13 @@ subastador.o: Subastador/subastador.hpp Subastador/subastador.cpp
 
 monitor.o: Monitor/monitor.hpp Monitor/monitor.cpp
 	${CPP} -c ${CPPFLAGS} Monitor/monitor.cpp
+
+Socket.o: Socket/Socket.cpp Socket/Socket.hpp
+	${CPP} -c ${CPPFLAGS} Socket/Socket.cpp
+
+cliente: Cliente/cliente.cpp
+	${CPP} -c ${CPPFLAGS} Cliente/cliente.cpp
+	${CPP} cliente.o -o cliente ${LDFLAGS}
 
 clean:
 	$(RM) *.o
