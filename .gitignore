@@ -1,0 +1,9 @@
+# Codelite Files
+*.o
+*.workspace
+*.project
+/.codelite
+/.clang
+/.Debug
+TP6.txt
+*.mk
