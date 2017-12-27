@@ -8,7 +8,7 @@
 
 RM = rm -rf
 
-CPP = c++
+CPP = g++
 
 # ####### ###### # 
 #
@@ -25,8 +25,8 @@ LDFLAGS=-L/usr/X11R6/lib -L/usr/local/lib -lm -pthread -lcurl -lX11
 
 all: ${target}
 
-${MAIN}: ${MAIN}.o imageDownloader.o admin.o gestor.o subastador.o
-	${CPP} ImageDownloader.o admin.o gestor.o subastador.o ${MAIN}.o -o ${MAIN} ${LDFLAGS}
+${MAIN}: ${MAIN}.o imageDownloader.o admin.o gestor.o subastador.o monitor.o
+	${CPP} ImageDownloader.o admin.o gestor.o subastador.o monitor.o ${MAIN}.o -o ${MAIN} ${LDFLAGS}
 
 ${MAIN}.o: ${MAIN}.cpp 
 	${CPP} -c ${CPPFLAGS} ${MAIN}.cpp
@@ -42,6 +42,9 @@ admin.o: Administrador/admin.hpp Administrador/admin.cpp
 
 subastador.o: Subastador/subastador.hpp Subastador/subastador.cpp
 	${CPP} -c ${CPPFLAGS} Subastador/subastador.cpp
+
+monitor.o: Monitor/monitor.hpp Monitor/monitor.cpp
+	${CPP} -c ${CPPFLAGS} Monitor/monitor.cpp
 
 clean:
 	$(RM) *.o
