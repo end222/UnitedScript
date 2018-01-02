@@ -1,7 +1,7 @@
 /*
  * Trabajo de PSCD
  * Daniel Naval
- * Victor Peñasco 
+ * Victor Peñasco
  * Pablo Orduna
  * Fichero: Monitor/monitor.hpp
  * Fecha: Enero 2018
@@ -15,31 +15,57 @@
 
 using namespace std;
 
-controlCola::controlCola(){
+control::control(){
 	fin = false;
+	numPujadoresTotal=0;
+	numPujadoresActivos=0;
+	aceptarPujadores=true;
 }
 
-void controlCola::colaPop(struct datosValla& datos){
+void control::colaPop(struct datosValla& datos){
 	unique_lock<recursive_mutex> lck(colaMtx);
 	while(cola.empty()){
-		cv.wait(lck);
+		cv_cola.wait(lck);
 	}
 	datos = cola.front();
 	cola.pop();
 }
 
-void controlCola::colaPush(struct datosValla datos){
+void control::colaPush(struct datosValla datos){
 	unique_lock<recursive_mutex> lck(colaMtx);
 	cola.push(datos);
-	cv.notify_all(); // La cola ya no esta vacia
+	cv_cola.notify_all(); // La cola ya no esta vacia
 }
 
-bool controlCola::haTerminado(){
+bool control::haTerminado(){
 	unique_lock<recursive_mutex> lck(finMtx);
 	return fin;
 }
 
-void controlCola::avisarFin(){
+void control::avisarFin(){
 	unique_lock<recursive_mutex> lck(finMtx);
 	fin=true;
+}
+
+void control::annadirPujador(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx));
+	numPujadoresTotal++;
+	numPujadoresActivos++;
+}
+
+void control::iniciarInscripcion(){
+	unique_lock<recursive_mutex> lck(inscripcionMtx));
+	this_thread::sleep_for(chrono::seconds(RETARDO));
+	aceptarPujadores=false;
+	cv_comenzar.notify_all();
+}
+
+void control::esperarComienzo(){
+	unique_lock<recursive_mutex> lck(inscripcionMtx));
+	cv_comenzar.wait();
+}
+
+bool control::seguirAceptando(){
+	unique_lock<recursive_mutex> lck(inscripcionMtx));
+	return aceptarPujadores;
 }

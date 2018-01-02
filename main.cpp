@@ -15,7 +15,7 @@ bool terminar=false;
 
 //-------------------------------------------------------------
 void servCliente(Socket& soc, int client_fd) {
-	while(salaDeEspera);
+	control.esperarComienzo();
 	char MENS_FIN[]="STOP";
 	// Buffer para recibir el mensaje
 	int length = 100;
@@ -96,7 +96,8 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	for (int i=0; i<max_connections && aceptarPujadores; i++) {
+	thread th_1(&control.iniciarInscripcion);
+	for (int i=0; i<max_connections && control.seguirAceptando(); i++) {
 		// Accept
 		client_fd[i] = socket.Accept();
 
@@ -113,7 +114,7 @@ int main(int argc, char *argv[]) {
 		cout << "Nuevo cliente " + to_string(i) + " aceptado" + "\n";
 		annadirPujador(); //incrementa en un unidad el número de pujadores
 	}
-
+	th_1.join();
 	//¿Qué pasa si algún thread acaba inesperadamente?
 	for (int i=0; i<max_connections; i++) {
 		cliente[i].join();
