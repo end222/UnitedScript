@@ -1,0 +1,37 @@
+
+RM = rm -rf
+
+# ####### ###### # 
+#
+
+MAIN=ServidorMulticliente
+target=${MAIN}
+sockets=Socket
+
+# ######
+#
+
+CPPFLAGS=-I. -O2 -std=c++11
+
+LDFLAGS=-pthread
+
+.PHONY:all
+
+all: ${target}
+
+${MAIN}: ${MAIN}.o ${sockets}.o
+	g++ ${LDFLAGS} ${sockets}.o ${MAIN}.o -o ${MAIN}
+
+${MAIN}.o: ${MAIN}.cpp 
+	g++ -c ${CPPFLAGS} -c ${MAIN}.cpp
+
+${sockets}.o: ${sockets}.hpp ${sockets}.cpp
+	g++ -c ${CPPFLAGS} ${sockets}.cpp
+
+clean:
+	$(RM) *.o
+	$(RM) ${target}
+
+echo:
+	echo ${target}
+	echo -n "cppflags: " ${CPPFLAGS}

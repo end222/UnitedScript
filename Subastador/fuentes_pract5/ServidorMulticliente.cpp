@@ -6,7 +6,7 @@
 //         Compilar el fichero "Makefile" asociado, mediante "make".
 //*****************************************************************
 
-#include "../Socket/Socket.hpp"
+#include "Socket.hpp"
 #include <iostream>
 #include <thread>
 #include <cstring> //manejo de cadenas tipo C
