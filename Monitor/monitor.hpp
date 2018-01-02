@@ -15,9 +15,9 @@
 using namespace std;
 
 struct datosValla{
-	string url;
+	char url[500];
 	int tiempo;
-	string nombreCliente;
+	char nombreCliente[500];
 	int precio;
 };
 
@@ -35,3 +35,5 @@ class controlCola{
 		condition_variable_any cv;
 		queue<datosValla> cola;
 };
+
+controlCola control;
