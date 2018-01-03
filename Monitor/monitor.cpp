@@ -1,8 +1,9 @@
 /*
  * Trabajo de PSCD
- * Daniel Naval
- * Victor Peñasco
- * Pablo Orduna
+ * Autores:
+ * - Daniel Naval
+ * - Victor Peñasco
+ * - Pablo Orduna
  * Fichero: Monitor/monitor.hpp
  * Fecha: Enero 2018
  */

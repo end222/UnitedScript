@@ -1,9 +1,11 @@
 /*
  * Trabajo de PSCD
- * Daniel Naval
- * Victor Peñasco
- * Pablo Orduna
+ * Autores:
+ * - Daniel Naval
+ * - Victor Peñasco
+ * - Pablo Orduna
  * Fichero: GestorVallas/gestor.hpp
+ * Fecha: Enero 2018
  */
 
 #include <iostream>
