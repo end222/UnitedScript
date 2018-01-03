@@ -2,7 +2,9 @@
 #include <string>
 #include "Imagen/ImageDownloader.hpp"
 #include "Imagen/CImg.h"
-#include "../Socket/Socket.hpp"
+#include "Socket/Socket.hpp"
+#include "Monitor/monitor.hpp"
+#include "GestorVallas/gestor.hpp"
 #include <thread>
 #include <cstring> //manejo de cadenas tipo C
 
