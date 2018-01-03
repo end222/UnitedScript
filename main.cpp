@@ -16,6 +16,7 @@ bool terminar=false;
 //-------------------------------------------------------------
 void servCliente(Socket& soc, int client_fd) {
 	control.esperarComienzo();
+
 	char MENS_FIN[]="STOP";
 	// Buffer para recibir el mensaje
 	int length = 100;
@@ -96,7 +97,11 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	thread th_1(&control.iniciarInscripcion);
+	thread th_inscripcion(&control.iniciarInscripcion);
+	thread th_administrador(&procesoAdministrador);
+	thread th_vallas(&procesoGestorVallas);
+	thread th_subastador(&procesoSubastador);
+
 	for (int i=0; i<max_connections && control.seguirAceptando(); i++) {
 		// Accept
 		client_fd[i] = socket.Accept();
@@ -114,11 +119,17 @@ int main(int argc, char *argv[]) {
 		cout << "Nuevo cliente " + to_string(i) + " aceptado" + "\n";
 		annadirPujador(); //incrementa en un unidad el número de pujadores
 	}
-	th_1.join();
+
+	th_inscripcion.join();
+
 	//¿Qué pasa si algún thread acaba inesperadamente?
 	for (int i=0; i<max_connections; i++) {
 		cliente[i].join();
 	}
+	th_administrador.join();
+	th_vallas.join();
+	th_subastador.join();
+	
 
     // Cerramos el socket del servidor
     error_code = socket.Close(socket_fd);
@@ -126,7 +137,6 @@ int main(int argc, char *argv[]) {
 		string mensError(strerror(errno));
     	cerr << "Error cerrando el socket del servidor: " + mensError + "\n";
 	}
-
 	// Mensaje de despedida
 	cout << "Bye bye" << endl;
 

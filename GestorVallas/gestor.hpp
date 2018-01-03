@@ -15,6 +15,6 @@
 
 using namespace std;
 
-void iniciarGestorVallas();
+void procesoGestorVallas();
 
 #endif

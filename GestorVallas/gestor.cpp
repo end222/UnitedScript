@@ -15,7 +15,7 @@
 using namespace cimg_library;
 using namespace std;
 
-void iniciarGestorVallas(){
+void procesoGestorVallas(){
 
 	struct datosValla datos;
 	const int VALLA_WIDTH = 800;
@@ -34,4 +34,4 @@ void iniciarGestorVallas(){
 		valla.wait(datos.tiempo*1000);
 	}
 
-}	
+}
