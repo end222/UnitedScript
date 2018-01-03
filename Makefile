@@ -55,6 +55,7 @@ cliente: Cliente/cliente.cpp
 clean:
 	$(RM) *.o
 	$(RM) ${target}
+	$(RM) cliente
 
 echo:
 	echo ${target}
