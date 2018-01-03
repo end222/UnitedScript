@@ -19,6 +19,7 @@ bool terminar=false;
 void servCliente(Socket& soc, int client_fd) {
 	control.esperarComienzo();
 
+
 	char MENS_FIN[]="STOP";
 	// Buffer para recibir el mensaje
 	int length = 100;
@@ -26,37 +27,64 @@ void servCliente(Socket& soc, int client_fd) {
 
 	bool out = false; // Inicialmente no salir del bucle
 	while(!out) {
-		// Recibimos el mensaje del cliente
-		int rcv_bytes = soc.Recv(client_fd,buffer,length);
-		if (rcv_bytes == -1) {
+
+		//Inicio de las subastas
+		string message="START";
+		int send_bytes = soc.Send(client_fd, message);
+		if(send_bytes == -1) {
 			string mensError(strerror(errno));
-    		cerr << "Error al recibir datos: " + mensError + "\n";
+			cerr << "Error al enviar datos: " + mensError + "\n";
 			// Cerramos los sockets
 			soc.Close(client_fd);
+			exit(1);
 		}
 
-		cout << "Mensaje recibido: " << buffer << endl;
-
-		// Si recibimos "END OF SERVICE" --> Fin de la comunicación
-		if (0 == strcmp(buffer, MENS_FIN)) {
-			out = true; // Salir del bucle
-		} else {
-			// Contamos las vocales recibidas en el mensaje anterior
-			int num_vocales = cuentaVocales(buffer);
-
-			// Enviamos la respuesta
-			string s = to_string(num_vocales);
-			const char* message = s.c_str();
-
+		bool finSubasta=false;
+		while(!finSubasta){
+			message=to_string(); //Precio de la subasta
 			int send_bytes = soc.Send(client_fd, message);
 			if(send_bytes == -1) {
 				string mensError(strerror(errno));
-    			cerr << "Error al enviar datos: " + mensError + "\n";
+				cerr << "Error al enviar datos: " + mensError + "\n";
 				// Cerramos los sockets
 				soc.Close(client_fd);
 				exit(1);
 			}
+
+
+			// Recibimos el mensaje del cliente
+			int rcv_bytes = soc.Recv(client_fd,buffer,length);
+			if (rcv_bytes == -1) {
+				string mensError(strerror(errno));
+	    		cerr << "Error al recibir datos: " + mensError + "\n";
+				// Cerramos los sockets
+				soc.Close(client_fd);
+			}
+
+			cout << "Mensaje recibido: " << buffer << endl;
+
+			// Si recibimos "END OF SERVICE" --> Fin de la comunicación
+			if (0 == strcmp(buffer, MENS_FIN)) {
+				out = true; // Salir del bucle
+			} else {
+				// Contamos las vocales recibidas en el mensaje anterior
+				int num_vocales = cuentaVocales(buffer);
+
+				// Enviamos la respuesta
+				string s = to_string(num_vocales);
+				const char* message = s.c_str();
+
+				int send_bytes = soc.Send(client_fd, message);
+				if(send_bytes == -1) {
+					string mensError(strerror(errno));
+	    			cerr << "Error al enviar datos: " + mensError + "\n";
+					// Cerramos los sockets
+					soc.Close(client_fd);
+					exit(1);
+				}
+			}
 		}
+
 	}
 	soc.Close(client_fd);
 }
@@ -131,7 +159,7 @@ int main(int argc, char *argv[]) {
 	th_administrador.join();
 	th_vallas.join();
 	th_subastador.join();
-	
+
 
     // Cerramos el socket del servidor
     error_code = socket.Close(socket_fd);
