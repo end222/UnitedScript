@@ -53,32 +53,76 @@ int main(int argc, char * argv[]) {
 
     
 	string mensaje;
-	do{
-		// Leer mensaje de la entrada estandar
-		cout << "Frase para contar las vocales: ";
-		getline(cin, mensaje);
-		// Enviamos el mensaje, como cadena de C
-		int send_bytes = socket.Send(socket_fd, mensaje);
+	string aceptar = "ACCEPT";
+	string rechazar = "REJECT";
+	string buffer;
 
-		if(send_bytes == -1){
-			cerr << "Error al enviar datos: " << strerror(errno) << endl;
-			// Cerramos el socket
-			socket.Close(socket_fd);
-			exit(1);
+	bool finSubasta;
+	int ronda;
+	int subasta = 1;
+	bool haTerminado = false;
+	
+	string start = "START";
+	
+	while(!haTerminado){
+		int read_bytes = socket.Recv(socket_fd, buffer, MESSAGE_SIZE);
+		if(buffer == start){
+			finSubasta = false;
+			ronda = 1;
+			while(!finSubasta){
+				int read_bytes = socket.Recv(socket_fd, buffer, MESSAGE_SIZE);
+				cout << "SUBASTA " << subasta << endl;
+				cout << "RONDA " << ronda << endl;
+				cout << "Precio propuesto: " << buffer;
+				cout << "¿Acepta la propuesta? (si/no)" << endl;
+				cin >> mensaje;
+				
+				int send_bytes;
+
+				if(mensaje == "si"){
+					send_bytes = socket.Send(socket_fd, aceptar);
+				}
+
+				else{
+					send_bytes = socket.Send(socket_fd, rechazar);
+				}
+				
+				if(send_bytes == -1){
+					cerr << "Error al enviar datos: " << strerror(errno) << endl;
+					socket.Close(socket_fd);
+					exit(1);
+				}
+
+				read_bytes = socket.Recv(socket_fd, buffer, MESSAGE_SIZE);
+				
+				/* 
+				 * Código:
+				 * 0: Ha rechazado
+				 * 1: Ha aceptado pero aún no ha ganado
+				 * 2: Ha aceptado, ha ganado, pero no llega al precio de reserva
+				 * 3: ha aceptado, ha ganado y llega al precio de reserva
+				 */
+
+				if(buffer=="0"){
+					cout << "Ha rechazado la propuesta" << endl;
+				}
+				else if(buffer=="1"){
+					cout << "Ha aceptado la propuesta" << endl;
+				}
+				else if(buffer=="2"){
+					cout << "Ha aceptado la propuesta y ha ganado. Sin embargo, no ha llegado al " << 
+						"precio de reserva" << endl;
+				}
+				else{
+					cout << "Ha aceptado la propuesta y ha ganado. El anuncio se añadirá a la cola" <<
+						" de la valla" << endl;
+				}
+			}
 		}
-
-		if(mensaje != MENS_FIN){
-			// Buffer para almacenar la respuesta, como char[]
-		    	string buffer;
-
-		    	// Recibimos la respuesta del servidor  
-		    	int read_bytes = socket.Recv(socket_fd, buffer, MESSAGE_SIZE);
-
-		    	// Mostramos la respuesta
-		    	cout << "Mensaje enviado: '" << mensaje << "'" << endl;
-		    	cout << "Numero de vocales: " << buffer << endl;
+		else{
+			haTerminado = true;
 		}
-	} while(mensaje != MENS_FIN);
+	}
 
     	// Cerramos el socket
     	int error_code = socket.Close(socket_fd);
@@ -86,4 +130,5 @@ int main(int argc, char * argv[]) {
     	    	cerr << "Error cerrando el socket: " << strerror(errno) << endl;
     	}
     	return error_code;
+
 }

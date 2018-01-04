@@ -48,9 +48,9 @@ monitor.o: Monitor/monitor.hpp Monitor/monitor.cpp
 Socket.o: Socket/Socket.cpp Socket/Socket.hpp
 	${CC} -c ${CPPFLAGS} Socket/Socket.cpp
 
-cliente: Cliente/cliente.cpp
+cliente: Socket.o Cliente/cliente.cpp
 	${CC} -c ${CPPFLAGS} Cliente/cliente.cpp
-	${CC} cliente.o -o cliente ${LDFLAGS}
+	${CC} cliente.o Socket.o -o cliente ${LDFLAGS}
 
 clean:
 	$(RM) *.o
