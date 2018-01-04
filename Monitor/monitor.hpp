@@ -33,6 +33,12 @@ class control{
 		void iniciarInscripcion();
 		void esperarComienzo();
 		bool seguirAceptando();
+		bool terminaRonda();
+		void anadirRechaza();
+		void anadirAcepta();
+		void clearAceptan();
+		void clearRechazan();
+		int numPujadoresAceptan();
 	private:
 		const int RETARDO=10;
 		bool fin;
@@ -45,6 +51,8 @@ class control{
 		queue<datosValla> cola;
 		int numPujadoresTotal;
 		int numPujadoresActivos;
+		int numPujadoresAceptan;
+		int numPujadoresRechazan;
 		bool aceptarPujadores;
 };
 

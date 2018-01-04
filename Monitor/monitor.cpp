@@ -70,3 +70,34 @@ bool control::seguirAceptando(){
 	unique_lock<recursive_mutex> lck(inscripcionMtx));
 	return aceptarPujadores;
 }
+
+void control::anadirRechaza(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx);
+	numPujadoresRechazan++;
+}
+
+void control::anadirAcepta(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx);
+	numPujadoresAceptan++;
+}
+
+void control::clearAceptan(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx);
+	numPujadoresAceptan=0;
+}
+
+void control::clearRechazan(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx);
+	numPujadoresRechazan=0;
+}
+
+bool control::terminaRonda(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx);
+	return numPujadoresAceptan+numPujadoresRechazan==numPujadoresActivos;
+}
+
+int control::numeroPujadoresAceptan(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx);
+	return numPujadoresAceptan();
+}
+
