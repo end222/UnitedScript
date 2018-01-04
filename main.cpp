@@ -20,16 +20,16 @@ void servCliente(Socket& soc, int client_fd) {
 	control.esperarComienzo();
 
 
-	char MENS_FIN[]="STOP";
+	char MENS_CANCEL[]="REJECT";
+	char MENS_OK[]="ACCEPT";
 	// Buffer para recibir el mensaje
 	int length = 100;
 	char buffer[length];
+	string message;
+	while(!haTerminado()){
 
-	bool out = false; // Inicialmente no salir del bucle
-	while(!out) {
-
-		//Inicio de las subastas
-		string message="START";
+		//Inicio de la subasta
+		message="START";
 		int send_bytes = soc.Send(client_fd, message);
 		if(send_bytes == -1) {
 			string mensError(strerror(errno));
@@ -40,8 +40,10 @@ void servCliente(Socket& soc, int client_fd) {
 		}
 
 		bool finSubasta=false;
+		subasta subastaActual;
+
 		while(!finSubasta){
-			message=to_string(); //Precio de la subasta
+			message=to_string(subastaActual.obtenerPrecioActual()); //Precio de la subasta
 			int send_bytes = soc.Send(client_fd, message);
 			if(send_bytes == -1) {
 				string mensError(strerror(errno));
@@ -63,28 +65,55 @@ void servCliente(Socket& soc, int client_fd) {
 
 			cout << "Mensaje recibido: " << buffer << endl;
 
-			// Si recibimos "END OF SERVICE" --> Fin de la comunicación
-			if (0 == strcmp(buffer, MENS_FIN)) {
-				out = true; // Salir del bucle
-			} else {
-				// Contamos las vocales recibidas en el mensaje anterior
-				int num_vocales = cuentaVocales(buffer);
+			if (0 == strcmp(buffer, MENS_OK)) {
+				control.anadirAcepta();
 
-				// Enviamos la respuesta
-				string s = to_string(num_vocales);
-				const char* message = s.c_str();
+				//Espera a que todos contesten
 
-				int send_bytes = soc.Send(client_fd, message);
-				if(send_bytes == -1) {
-					string mensError(strerror(errno));
-	    			cerr << "Error al enviar datos: " + mensError + "\n";
-					// Cerramos los sockets
-					soc.Close(client_fd);
-					exit(1);
+				if(control.numPujadoresAceptan()==1){//Es el unico que queda
+					if(subasta.obtenerPrecioActual()-subasta.obtenerPrecioDeIncremento()>=
+						subasta.obtenerPrecioDeReserva()){
+						message="3"; //es el ganador
+						//mete en la cola los datos del cliente y la venta
+					}
+					else{ // no consigue la subata al no llegar al precio
+						message="2";
+					}
 				}
-			}
-		}
+				else{
+					//Es el último clieente pero la rechaza
+					message="1";
+				}
 
+			}
+			else{
+				//El cliente rechaza a voluntad la subasta
+				control.anadirRechaza();
+				finSubasta = true; // Salir del bucle
+				message="0";
+			}
+
+			int send_bytes = soc.Send(client_fd, message);
+			if(send_bytes == -1) {
+				string mensError(strerror(errno));
+				cerr << "Error al enviar datos: " + mensError + "\n";
+				// Cerramos los sockets
+				soc.Close(client_fd);
+				exit(1);
+			}
+
+		}
+		//Esperar a que todos terminen la subasta
+
+	}
+ 	message="END";
+	int send_bytes = soc.Send(client_fd, message);
+	if(send_bytes == -1) {
+		string mensError(strerror(errno));
+		cerr << "Error al enviar datos: " + mensError + "\n";
+		// Cerramos los sockets
+		soc.Close(client_fd);
+		exit(1);
 	}
 	soc.Close(client_fd);
 }

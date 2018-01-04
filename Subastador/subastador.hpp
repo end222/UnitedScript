@@ -18,14 +18,22 @@ using namespace std;
 
 class subasta{
 	public:
-		crearSubasta();
+		subasta();
+		int obtenerPrecioSalida();
+		int obtenerTiempo();
+		int obtenerPrecioDeReserva();
+		int obtenerPrecioActual();
+		int obtenerPrecioDeIncremento();
+		int incrementarPrecio();
 	private:
 		int precioSalida;
 		int tiempo;
 		int precioDeReserva;
 		int precioActual;
-		int preciodeIncremento;
+		int precioDeIncremento;
 };
+
+
 
 void ();
 

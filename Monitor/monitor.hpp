@@ -12,6 +12,7 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include "subastador.h"
 
 using namespace std;
 
@@ -48,12 +49,15 @@ class control{
 		recursive_mutex inscripcionMtx;
 		condition_variable_any cv_cola;
 		condition_variable_any cv_comenzar;
+		condition_variable_any cv_finRonda;
+		condition_variable_any cv_finSubasta;
 		queue<datosValla> cola;
 		int numPujadoresTotal;
 		int numPujadoresActivos;
 		int numPujadoresAceptan;
 		int numPujadoresRechazan;
 		bool aceptarPujadores;
+		int precioActual;
 };
 
 control control;
