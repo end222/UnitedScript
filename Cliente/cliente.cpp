@@ -100,7 +100,7 @@ int main(int argc, char * argv[]) {
 				 * 0: Ha rechazado
 				 * 1: Ha aceptado pero aún no ha ganado
 				 * 2: Ha aceptado, ha ganado, pero no llega al precio de reserva
-				 * 3: ha aceptado, ha ganado y llega al precio de reserva
+				 * 3: Ha aceptado, ha ganado y llega al precio de reserva
 				 */
 
 				if(buffer=="0"){
