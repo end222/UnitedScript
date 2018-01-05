@@ -110,3 +110,18 @@ int control::numeroPujadoresAceptan(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	return numPujadoresAceptan();
 }
+
+void control::esperarFinRonda(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx));
+	cv_finRonda.wait();
+}
+
+void control::esperarFinSubasta(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx));
+	cv_finSubasta.wait();
+}
+
+void control::notificarFinSubasta(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx));
+	cv_finSubasta.notify_all();
+}

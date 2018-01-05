@@ -40,6 +40,9 @@ class control{
 		void clearAceptan();
 		void clearRechazan();
 		int numPujadoresAceptan();
+		void esperarFinRonda();
+		void esperarFinSubasta();
+		void notificarFinSubasta();
 	private:
 		const int RETARDO=10;
 		bool fin;

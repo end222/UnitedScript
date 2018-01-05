@@ -19,7 +19,6 @@ bool terminar=false;
 void servCliente(Socket& soc, int client_fd) {
 	control.esperarComienzo();
 
-
 	char MENS_CANCEL[]="REJECT";
 	char MENS_OK[]="ACCEPT";
 	// Buffer para recibir el mensaje
@@ -68,9 +67,11 @@ void servCliente(Socket& soc, int client_fd) {
 			if (0 == strcmp(buffer, MENS_OK)) {
 				control.anadirAcepta();
 
-				//Espera a que todos contesten
+				control.esperarFinRonda(); //Espera a que todos contesten
 
 				if(control.numPujadoresAceptan()==1){//Es el unico que queda
+					finSubasta = true; // Salir del bucle
+					control.notificarFinSubasta();
 					if(subasta.obtenerPrecioActual()-subasta.obtenerPrecioDeIncremento()>=
 						subasta.obtenerPrecioDeReserva()){
 						message="3"; //es el ganador
@@ -81,7 +82,7 @@ void servCliente(Socket& soc, int client_fd) {
 					}
 				}
 				else{
-					//Es el último clieente pero la rechaza
+					//Acepta pero NO es el último cliente
 					message="1";
 				}
 
@@ -91,6 +92,10 @@ void servCliente(Socket& soc, int client_fd) {
 				control.anadirRechaza();
 				finSubasta = true; // Salir del bucle
 				message="0";
+				control.esperarFinRonda(); //Espera a que todos contesten
+				if(control.numPujadoresAceptan()==0){
+					control.notificarFinSubasta();
+				}
 			}
 
 			int send_bytes = soc.Send(client_fd, message);
@@ -101,9 +106,8 @@ void servCliente(Socket& soc, int client_fd) {
 				soc.Close(client_fd);
 				exit(1);
 			}
-
 		}
-		//Esperar a que todos terminen la subasta
+		control.esperarFinSubasta();//Esperar a que todos terminen la subasta
 
 	}
  	message="END";
