@@ -51,8 +51,8 @@ void Control::annadirPujador(){
 }
 
 void Control::iniciarInscripcion(){
-	unique_lock<recursive_mutex> lck(inscripcionMtx);
 	this_thread::sleep_for(chrono::seconds(RETARDO));
+	unique_lock<recursive_mutex> lck(inscripcionMtx);
 	aceptarPujadores=false;
 	cv_comenzar.notify_all();
 }
@@ -75,6 +75,9 @@ void Control::anadirRechaza(subasta& subastaActual){
 		subastaActual.incrementarPrecio();
 		cv_finRonda.notify_all();
 	}
+	else{
+		cv_finRonda.wait(lck);
+	}
 }
 
 void Control::anadirAcepta(subasta& subastaActual){
@@ -84,6 +87,9 @@ void Control::anadirAcepta(subasta& subastaActual){
 		clearAceptan();
 		subastaActual.incrementarPrecio();
 		cv_finRonda.notify_all();
+	}
+	else{
+		cv_finRonda.wait(lck);
 	}
 }
 

@@ -51,7 +51,7 @@ int main(int argc, char * argv[]) {
 		return socket_fd;
 	}
 
-    
+
 	string mensaje;
 	string aceptar = "ACCEPT";
 	string rechazar = "REJECT";
@@ -61,9 +61,9 @@ int main(int argc, char * argv[]) {
 	int ronda;
 	int subasta = 1;
 	bool haTerminado = false;
-	
+
 	string start = "START";
-	
+
 	while(!haTerminado){
 		int read_bytes = socket.Recv(socket_fd, buffer, MESSAGE_SIZE);
 		if(buffer == start){
@@ -76,7 +76,7 @@ int main(int argc, char * argv[]) {
 				cout << "Precio propuesto: " << buffer;
 				cout << "¿Acepta la propuesta? (si/no)" << endl;
 				cin >> mensaje;
-				
+
 				int send_bytes;
 
 				if(mensaje == "si"){
@@ -86,7 +86,7 @@ int main(int argc, char * argv[]) {
 				else{
 					send_bytes = socket.Send(socket_fd, rechazar);
 				}
-				
+
 				if(send_bytes == -1){
 					cerr << "Error al enviar datos: " << strerror(errno) << endl;
 					socket.Close(socket_fd);
@@ -94,8 +94,9 @@ int main(int argc, char * argv[]) {
 				}
 
 				read_bytes = socket.Recv(socket_fd, buffer, MESSAGE_SIZE);
-				
-				/* 
+				cout << buffer << endl;
+
+				/*
 				 * Código:
 				 * 0: Ha rechazado
 				 * 1: Ha aceptado pero aún no ha ganado
@@ -110,7 +111,7 @@ int main(int argc, char * argv[]) {
 					cout << "Ha aceptado la propuesta" << endl;
 				}
 				else if(buffer=="2"){
-					cout << "Ha aceptado la propuesta y ha ganado. Sin embargo, no ha llegado al " << 
+					cout << "Ha aceptado la propuesta y ha ganado. Sin embargo, no ha llegado al " <<
 						"precio de reserva" << endl;
 				}
 				else{

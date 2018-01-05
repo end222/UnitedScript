@@ -21,7 +21,7 @@ subasta subastaActual;
 void comenzarInscripcion(){
 	control.iniciarInscripcion();
 }
- 
+
 //-------------------------------------------------------------
 void servCliente(Socket& soc, int client_fd) {
 	control.esperarComienzo();
@@ -73,8 +73,6 @@ void servCliente(Socket& soc, int client_fd) {
 			if (0 == strcmp(buffer, MENS_OK)) {
 				control.anadirAcepta(subastaActual);
 
-				control.esperarFinRonda(); //Espera a que todos contesten
-
 				if(control.numeroPujadoresAceptan()==1){//Es el unico que queda
 					finSubasta = true; // Salir del bucle
 					control.notificarFinSubasta();
@@ -98,7 +96,6 @@ void servCliente(Socket& soc, int client_fd) {
 				control.anadirRechaza(subastaActual);
 				finSubasta = true; // Salir del bucle
 				message="0";
-				control.esperarFinRonda(); //Espera a que todos contesten
 				if(control.numeroPujadoresAceptan()==0){
 					control.notificarFinSubasta();
 				}
@@ -131,12 +128,11 @@ void servCliente(Socket& soc, int client_fd) {
 int main(int argc, char *argv[]) {
 	const int N = 10;
 	// Dirección y número donde escucha el proceso servidor
-	if(argc!=3){
+	if(argc!=2){
 		cout << "Numero de argumentos incorrecto" << endl;
-		cout << "ARGUMENTOS: <server_adress> <server_port>" << endl;
+		cout << "ARGUMENTOS:<server_port>" << endl;
 	}
-	string SERVER_ADDRESS = argv[1];
-	int SERVER_PORT = atoi(argv[2]);
+	int SERVER_PORT = atoi(argv[1]);
 	thread cliente[N];
 	int client_fd[N];
 
@@ -166,23 +162,25 @@ int main(int argc, char *argv[]) {
 	thread th_inscripcion(&comenzarInscripcion);
 	thread th_administrador(&procesoAdministrador);
 	thread th_vallas(&procesoGestorVallas, ref(control));
-
+	cout << control.seguirAceptando() << endl;
 	for (int i=0; i<max_connections && control.seguirAceptando(); i++) {
 		// Accept
+		cout << "Acepto nuevo cliente " + to_string(i) + "\n";
 		client_fd[i] = socket.Accept();
-
-		if(client_fd[i] == -1) {
-			string mensError(strerror(errno));
-    		cerr << "Error en el accept: " + mensError + "\n";
-			// Cerramos el socket
-			socket.Close(socket_fd);
-			exit(1);
+		if(control.seguirAceptando()){
+			if(client_fd[i] == -1) {
+				string mensError(strerror(errno));
+    			cerr << "Error en el accept: " + mensError + "\n";
+				// Cerramos el socket
+				socket.Close(socket_fd);
+				exit(1);
+			}
+			cout << control.seguirAceptando() << endl;
+			cout << "Lanzo thread nuevo cliente " + to_string(i) + "\n";
+			cliente[i] = thread(&servCliente, ref(socket), client_fd[i]);
+			cout << "Nuevo cliente " + to_string(i) + " aceptado" + "\n";
+			control.annadirPujador(); //incrementa en un unidad el número de pujadores
 		}
-
-		cout << "Lanzo thread nuevo cliente " + to_string(i) + "\n";
-		cliente[i] = thread(&servCliente, ref(socket), client_fd[i]);
-		cout << "Nuevo cliente " + to_string(i) + " aceptado" + "\n";
-		control.annadirPujador(); //incrementa en un unidad el número de pujadores
 	}
 
 	th_inscripcion.join();
