@@ -5,6 +5,7 @@
 #include "Socket/Socket.hpp"
 #include "Monitor/monitor.hpp"
 #include "GestorVallas/gestor.hpp"
+#include "Administrador/admin.hpp"
 #include <thread>
 #include <cstring> //manejo de cadenas tipo C
 
@@ -14,7 +15,13 @@ using namespace cimg_library;
 /* --VARIABLES GLOBALES DE USO COMPARTIDO ENTRE PROCESOS*/
 bool aceptarPujadores=true; //Booleano para admitir la entrada de nuevos clientes a la subasta.
 bool terminar=false;
+Control control;
+subasta subastaActual;
 
+void comenzarInscripcion(){
+	control.iniciarInscripcion();
+}
+ 
 //-------------------------------------------------------------
 void servCliente(Socket& soc, int client_fd) {
 	control.esperarComienzo();
@@ -25,7 +32,7 @@ void servCliente(Socket& soc, int client_fd) {
 	int length = 100;
 	char buffer[length];
 	string message;
-	while(!haTerminado()){
+	while(!control.haTerminado()){
 
 		//Inicio de la subasta
 		message="START";
@@ -39,7 +46,6 @@ void servCliente(Socket& soc, int client_fd) {
 		}
 
 		bool finSubasta=false;
-		subasta subastaActual;
 
 		while(!finSubasta){
 			message=to_string(subastaActual.obtenerPrecioActual()); //Precio de la subasta
@@ -65,15 +71,15 @@ void servCliente(Socket& soc, int client_fd) {
 			cout << "Mensaje recibido: " << buffer << endl;
 
 			if (0 == strcmp(buffer, MENS_OK)) {
-				control.anadirAcepta();
+				control.anadirAcepta(subastaActual);
 
 				control.esperarFinRonda(); //Espera a que todos contesten
 
-				if(control.numPujadoresAceptan()==1){//Es el unico que queda
+				if(control.numeroPujadoresAceptan()==1){//Es el unico que queda
 					finSubasta = true; // Salir del bucle
 					control.notificarFinSubasta();
-					if(subasta.obtenerPrecioActual()-subasta.obtenerPrecioDeIncremento()>=
-						subasta.obtenerPrecioDeReserva()){
+					if(subastaActual.obtenerPrecioActual()-subastaActual.obtenerPrecioDeIncremento()>=
+						subastaActual.obtenerPrecioDeReserva()){
 						message="3"; //es el ganador
 						//mete en la cola los datos del cliente y la venta
 					}
@@ -89,16 +95,16 @@ void servCliente(Socket& soc, int client_fd) {
 			}
 			else{
 				//El cliente rechaza a voluntad la subasta
-				control.anadirRechaza();
+				control.anadirRechaza(subastaActual);
 				finSubasta = true; // Salir del bucle
 				message="0";
 				control.esperarFinRonda(); //Espera a que todos contesten
-				if(control.numPujadoresAceptan()==0){
+				if(control.numeroPujadoresAceptan()==0){
 					control.notificarFinSubasta();
 				}
 			}
 
-			int send_bytes = soc.Send(client_fd, message);
+			send_bytes = soc.Send(client_fd, message);
 			if(send_bytes == -1) {
 				string mensError(strerror(errno));
 				cerr << "Error al enviar datos: " + mensError + "\n";
@@ -129,16 +135,13 @@ int main(int argc, char *argv[]) {
 		cout << "Numero de argumentos incorrecto" << endl;
 		cout << "ARGUMENTOS: <server_adress> <server_port>" << endl;
 	}
-    string SERVER_ADDRESS = argv[1];
-    int SERVER_PORT = atoi(argv[2]);
-    thread cliente[N];
-    int client_fd[N];
+	string SERVER_ADDRESS = argv[1];
+	int SERVER_PORT = atoi(argv[2]);
+	thread cliente[N];
+	int client_fd[N];
 
 	// Creación del socket con el que se llevará a cabo
 	// la comunicación con el servidor.
-	while(!terminar){
-
-	}
 	Socket socket(SERVER_PORT);
 
 	// Bind
@@ -160,10 +163,9 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	thread th_inscripcion(&control.iniciarInscripcion);
+	thread th_inscripcion(&comenzarInscripcion);
 	thread th_administrador(&procesoAdministrador);
-	thread th_vallas(&procesoGestorVallas);
-	thread th_subastador(&procesoSubastador);
+	thread th_vallas(&procesoGestorVallas, ref(control));
 
 	for (int i=0; i<max_connections && control.seguirAceptando(); i++) {
 		// Accept
@@ -180,7 +182,7 @@ int main(int argc, char *argv[]) {
 		cout << "Lanzo thread nuevo cliente " + to_string(i) + "\n";
 		cliente[i] = thread(&servCliente, ref(socket), client_fd[i]);
 		cout << "Nuevo cliente " + to_string(i) + " aceptado" + "\n";
-		annadirPujador(); //incrementa en un unidad el número de pujadores
+		control.annadirPujador(); //incrementa en un unidad el número de pujadores
 	}
 
 	th_inscripcion.join();
@@ -191,7 +193,6 @@ int main(int argc, char *argv[]) {
 	}
 	th_administrador.join();
 	th_vallas.join();
-	th_subastador.join();
 
 
     // Cerramos el socket del servidor

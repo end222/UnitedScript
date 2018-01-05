@@ -8,11 +8,12 @@
  * Fecha: Enero 2018
  */
 
+#include <thread>
 #include <iostream>
 #include <queue>
 #include <mutex>
 #include <condition_variable>
-#include "subastador.h"
+#include "../Subastador/subastador.hpp"
 
 using namespace std;
 
@@ -23,11 +24,11 @@ struct datosValla{
 	int precio;
 };
 
-class control{
+class Control{
 	public:
-		control();
-		void colaPop(struct datosValla& datos);
-		void colaPush(struct datosValla datos);
+		Control();
+		void colaPop(datosValla& datos);
+		void colaPush(datosValla datos);
 		bool haTerminado();
 		void avisarFin();
 		void annadirPujador();
@@ -35,11 +36,11 @@ class control{
 		void esperarComienzo();
 		bool seguirAceptando();
 		bool terminaRonda();
-		void anadirRechaza();
-		void anadirAcepta();
+		void anadirRechaza(subasta& subastaActual);
+		void anadirAcepta(subasta& subastaActual);
 		void clearAceptan();
 		void clearRechazan();
-		int numPujadoresAceptan();
+		int numeroPujadoresAceptan();
 		void esperarFinRonda();
 		void esperarFinSubasta();
 		void notificarFinSubasta();
@@ -62,5 +63,3 @@ class control{
 		bool aceptarPujadores;
 		int precioActual;
 };
-
-control control;

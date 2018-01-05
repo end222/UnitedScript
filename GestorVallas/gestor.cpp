@@ -17,7 +17,7 @@
 using namespace cimg_library;
 using namespace std;
 
-void procesoGestorVallas(){
+void procesoGestorVallas(Control& control){
 
 	struct datosValla datos;
 	const int VALLA_WIDTH = 800;

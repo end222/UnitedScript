@@ -12,11 +12,10 @@
 #define GESTOR_H
 
 #include <iostream>
-#include "../Monitor/monitor.hpp"
 #include <string>
 
 using namespace std;
 
-void procesoGestorVallas();
+void procesoGestorVallas(Control& control);
 
 #endif

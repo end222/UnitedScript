@@ -8,7 +8,6 @@
  * Fecha: Enero 2018
  */
 
-#include <iostream>
 #include "subastador.hpp"
 
 using namespace std;
@@ -22,27 +21,27 @@ subasta::subasta(){
 	precioActual=precioSalida;
 }
 
-int obtenerPrecioSalida(){
+int subasta::obtenerPrecioSalida(){
 	return precioSalida;
 }
 
-int obtenerTiempo(){
+int subasta::obtenerTiempo(){
 	return tiempo;
 }
 
-int obtenerPrecioDeReserva(){
+int subasta::obtenerPrecioDeReserva(){
 	return precioDeReserva;
 }
 
-int obtenerPrecioActual(){
+int subasta::obtenerPrecioActual(){
 	return precioActual;
 }
 
-int obtenerPrecioDeIncremento(){
+int subasta::obtenerPrecioDeIncremento(){
 	return precioDeIncremento;
 }
 
-int incrementarPrecio(){
+int subasta::incrementarPrecio(){
 	precioActual+=precioDeIncremento;
 	return precioActual;
 }

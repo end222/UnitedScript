@@ -8,22 +8,18 @@
  * Fecha: Enero 2018
  */
 
-#include <iostream>
-#include <queue>
-#include <mutex>
-#include <condition_variable>
 #include "monitor.hpp"
 
 using namespace std;
 
-control::control(){
+Control::Control(){
 	fin = false;
 	numPujadoresTotal=0;
 	numPujadoresActivos=0;
 	aceptarPujadores=true;
 }
 
-void control::colaPop(struct datosValla& datos){
+void Control::colaPop(struct datosValla& datos){
 	unique_lock<recursive_mutex> lck(colaMtx);
 	while(cola.empty()){
 		cv_cola.wait(lck);
@@ -32,96 +28,96 @@ void control::colaPop(struct datosValla& datos){
 	cola.pop();
 }
 
-void control::colaPush(struct datosValla datos){
+void Control::colaPush(struct datosValla datos){
 	unique_lock<recursive_mutex> lck(colaMtx);
 	cola.push(datos);
 	cv_cola.notify_all(); // La cola ya no esta vacia
 }
 
-bool control::haTerminado(){
+bool Control::haTerminado(){
 	unique_lock<recursive_mutex> lck(finMtx);
 	return fin;
 }
 
-void control::avisarFin(){
+void Control::avisarFin(){
 	unique_lock<recursive_mutex> lck(finMtx);
 	fin=true;
 }
 
-void control::annadirPujador(){
-	unique_lock<recursive_mutex> lck(pujadoresMtx));
+void Control::annadirPujador(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	numPujadoresTotal++;
 	numPujadoresActivos++;
 }
 
-void control::iniciarInscripcion(){
-	unique_lock<recursive_mutex> lck(inscripcionMtx));
+void Control::iniciarInscripcion(){
+	unique_lock<recursive_mutex> lck(inscripcionMtx);
 	this_thread::sleep_for(chrono::seconds(RETARDO));
 	aceptarPujadores=false;
 	cv_comenzar.notify_all();
 }
 
-void control::esperarComienzo(){
-	unique_lock<recursive_mutex> lck(inscripcionMtx));
-	cv_comenzar.wait();
+void Control::esperarComienzo(){
+	unique_lock<recursive_mutex> lck(inscripcionMtx);
+	cv_comenzar.wait(lck);
 }
 
-bool control::seguirAceptando(){
-	unique_lock<recursive_mutex> lck(inscripcionMtx));
+bool Control::seguirAceptando(){
+	unique_lock<recursive_mutex> lck(inscripcionMtx);
 	return aceptarPujadores;
 }
 
-void control::anadirRechaza(){
+void Control::anadirRechaza(subasta& subastaActual){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	numPujadoresRechazan++;
 	if(numPujadoresAceptan+numPujadoresRechazan==numPujadoresActivos){
 		clearAceptan();
-		subasta.incrementarPrecio();
+		subastaActual.incrementarPrecio();
 		cv_finRonda.notify_all();
 	}
 }
 
-void control::anadirAcepta(){
+void Control::anadirAcepta(subasta& subastaActual){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	numPujadoresAceptan++;
 	if(numPujadoresAceptan+numPujadoresRechazan==numPujadoresActivos){
 		clearAceptan();
-		subasta.incrementarPrecio();
+		subastaActual.incrementarPrecio();
 		cv_finRonda.notify_all();
 	}
 }
 
-void control::clearAceptan(){
+void Control::clearAceptan(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	numPujadoresAceptan=0;
 }
 
-void control::clearRechazan(){
+void Control::clearRechazan(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	numPujadoresRechazan=0;
 }
 
-bool control::terminaRonda(){
+bool Control::terminaRonda(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	return numPujadoresAceptan+numPujadoresRechazan==numPujadoresActivos;
 }
 
-int control::numeroPujadoresAceptan(){
+int Control::numeroPujadoresAceptan(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
-	return numPujadoresAceptan();
+	return numPujadoresAceptan;
 }
 
-void control::esperarFinRonda(){
-	unique_lock<recursive_mutex> lck(pujadoresMtx));
-	cv_finRonda.wait();
+void Control::esperarFinRonda(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx);
+	cv_finRonda.wait(lck);
 }
 
-void control::esperarFinSubasta(){
-	unique_lock<recursive_mutex> lck(pujadoresMtx));
-	cv_finSubasta.wait();
+void Control::esperarFinSubasta(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx);
+	cv_finSubasta.wait(lck);
 }
 
-void control::notificarFinSubasta(){
-	unique_lock<recursive_mutex> lck(pujadoresMtx));
+void Control::notificarFinSubasta(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	cv_finSubasta.notify_all();
 }

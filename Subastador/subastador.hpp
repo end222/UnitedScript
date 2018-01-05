@@ -34,7 +34,4 @@ class subasta{
 };
 
 
-
-void ();
-
 #endif
