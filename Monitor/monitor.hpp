@@ -44,6 +44,7 @@ class Control{
 		void esperarFinRonda();
 		void esperarFinSubasta();
 		void notificarFinSubasta();
+		void mostrar(string texto);
 	private:
 		const int RETARDO=10;
 		bool fin;
@@ -51,6 +52,7 @@ class Control{
 		recursive_mutex colaMtx;
 		recursive_mutex pujadoresMtx;
 		recursive_mutex inscripcionMtx;
+		recursive_mutex textoMtx;
 		condition_variable_any cv_cola;
 		condition_variable_any cv_comenzar;
 		condition_variable_any cv_finRonda;

@@ -23,7 +23,7 @@ void comenzarInscripcion(){
 }
 
 //-------------------------------------------------------------
-void servCliente(Socket& soc, int client_fd) {
+void servCliente(Socket& soc, int client_fd, int numCliente) {
 	control.esperarComienzo();
 
 	char MENS_CANCEL[]="REJECT";
@@ -32,6 +32,8 @@ void servCliente(Socket& soc, int client_fd) {
 	int length = 100;
 	char buffer[length];
 	string message;
+	string mostrarMens;
+
 	while(!control.haTerminado()){
 
 		//Inicio de la subasta
@@ -67,13 +69,15 @@ void servCliente(Socket& soc, int client_fd) {
 				// Cerramos los sockets
 				soc.Close(client_fd);
 			}
-
-			cout << "Mensaje recibido: " << buffer << endl;
+	
+			mostrarMens = "Mensaje recibido del cliente " + to_string(numCliente) + ": " + buffer;
+			control.mostrar(mostrarMens);
 
 			if (0 == strcmp(buffer, MENS_OK)) {
 				control.anadirAcepta(subastaActual);
 
-				if(control.numeroPujadoresAceptan()==1){//Es el unico que queda
+				int numAceptan = control.numeroPujadoresAceptan();
+				if(numAceptan == 1){//Es el unico que queda
 					finSubasta = true; // Salir del bucle
 					control.notificarFinSubasta();
 					if(subastaActual.obtenerPrecioActual()-subastaActual.obtenerPrecioDeIncremento()>=
@@ -81,7 +85,7 @@ void servCliente(Socket& soc, int client_fd) {
 						message="3"; //es el ganador
 						//mete en la cola los datos del cliente y la venta
 					}
-					else{ // no consigue la subata al no llegar al precio
+					else{ // no consigue la subasta al no llegar al precio
 						message="2";
 					}
 				}
@@ -99,8 +103,14 @@ void servCliente(Socket& soc, int client_fd) {
 				if(control.numeroPujadoresAceptan()==0){
 					control.notificarFinSubasta();
 				}
+				else{
+					control.esperarFinSubasta();//Esperar a que todos terminen la subasta
+				}
 			}
-
+			if(control.terminaRonda()){
+				subastaActual.incrementarPrecio();
+				control.clearAceptan();
+			}
 			send_bytes = soc.Send(client_fd, message);
 			if(send_bytes == -1) {
 				string mensError(strerror(errno));
@@ -110,7 +120,6 @@ void servCliente(Socket& soc, int client_fd) {
 				exit(1);
 			}
 		}
-		control.esperarFinSubasta();//Esperar a que todos terminen la subasta
 
 	}
  	message="END";
@@ -149,7 +158,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Listen
-    int max_connections = N;
+	int max_connections = N;
 	int error_code = socket.Listen(max_connections);
 	if (error_code == -1) {
 		string mensError(strerror(errno));
@@ -162,10 +171,8 @@ int main(int argc, char *argv[]) {
 	thread th_inscripcion(&comenzarInscripcion);
 	thread th_administrador(&procesoAdministrador);
 	thread th_vallas(&procesoGestorVallas, ref(control));
-	cout << control.seguirAceptando() << endl;
 	for (int i=0; i<max_connections && control.seguirAceptando(); i++) {
 		// Accept
-		cout << "Acepto nuevo cliente " + to_string(i) + "\n";
 		client_fd[i] = socket.Accept();
 		if(control.seguirAceptando()){
 			if(client_fd[i] == -1) {
@@ -175,9 +182,7 @@ int main(int argc, char *argv[]) {
 				socket.Close(socket_fd);
 				exit(1);
 			}
-			cout << control.seguirAceptando() << endl;
-			cout << "Lanzo thread nuevo cliente " + to_string(i) + "\n";
-			cliente[i] = thread(&servCliente, ref(socket), client_fd[i]);
+			cliente[i] = thread(&servCliente, ref(socket), client_fd[i], i);
 			cout << "Nuevo cliente " + to_string(i) + " aceptado" + "\n";
 			control.annadirPujador(); //incrementa en un unidad el número de pujadores
 		}

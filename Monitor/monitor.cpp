@@ -14,9 +14,11 @@ using namespace std;
 
 Control::Control(){
 	fin = false;
-	numPujadoresTotal=0;
-	numPujadoresActivos=0;
-	aceptarPujadores=true;
+	numPujadoresTotal = 0;
+	numPujadoresActivos = 0;
+	aceptarPujadores = true;
+	numPujadoresAceptan = 0;
+	numPujadoresRechazan = 0;
 }
 
 void Control::colaPop(struct datosValla& datos){
@@ -71,8 +73,6 @@ void Control::anadirRechaza(subasta& subastaActual){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	numPujadoresRechazan++;
 	if(numPujadoresAceptan+numPujadoresRechazan==numPujadoresActivos){
-		clearAceptan();
-		subastaActual.incrementarPrecio();
 		cv_finRonda.notify_all();
 	}
 	else{
@@ -84,8 +84,6 @@ void Control::anadirAcepta(subasta& subastaActual){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	numPujadoresAceptan++;
 	if(numPujadoresAceptan+numPujadoresRechazan==numPujadoresActivos){
-		clearAceptan();
-		subastaActual.incrementarPrecio();
 		cv_finRonda.notify_all();
 	}
 	else{
@@ -126,4 +124,9 @@ void Control::esperarFinSubasta(){
 void Control::notificarFinSubasta(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	cv_finSubasta.notify_all();
+}
+
+void Control::mostrar(string texto){
+	unique_lock<recursive_mutex> lck(textoMtx);
+	cout << texto << endl;
 }

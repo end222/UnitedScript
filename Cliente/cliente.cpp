@@ -71,12 +71,14 @@ int main(int argc, char * argv[]) {
 			ronda = 1;
 			while(!finSubasta){
 				int read_bytes = socket.Recv(socket_fd, buffer, MESSAGE_SIZE);
+				cout << "=============================" << endl;
 				cout << "SUBASTA " << subasta << endl;
 				cout << "RONDA " << ronda << endl;
 				cout << "Precio propuesto: " << buffer;
 				cout << "¿Acepta la propuesta? (si/no)" << endl;
+				cout << "=============================" << endl;
 				cin >> mensaje;
-
+				ronda++;
 				int send_bytes;
 
 				if(mensaje == "si"){
@@ -106,6 +108,7 @@ int main(int argc, char * argv[]) {
 
 				if(buffer=="0"){
 					cout << "Ha rechazado la propuesta" << endl;
+					finSubasta = true;
 				}
 				else if(buffer=="1"){
 					cout << "Ha aceptado la propuesta" << endl;
@@ -113,12 +116,15 @@ int main(int argc, char * argv[]) {
 				else if(buffer=="2"){
 					cout << "Ha aceptado la propuesta y ha ganado. Sin embargo, no ha llegado al " <<
 						"precio de reserva" << endl;
+					finSubasta = true;
 				}
 				else{
 					cout << "Ha aceptado la propuesta y ha ganado. El anuncio se añadirá a la cola" <<
 						" de la valla" << endl;
+					finSubasta = true;
 				}
 			}
+			subasta++;
 		}
 		else{
 			haTerminado = true;
