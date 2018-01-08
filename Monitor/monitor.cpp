@@ -21,7 +21,7 @@ Control::Control(){
 	numPujadoresRechazan = 0;
 }
 
-void Control::colaPop(struct datosValla& datos){
+void Control::colaPop(datosValla& datos){
 	unique_lock<recursive_mutex> lck(colaMtx);
 	while(cola.empty()){
 		cv_cola.wait(lck);
@@ -30,14 +30,15 @@ void Control::colaPop(struct datosValla& datos){
 	cola.pop();
 }
 
-void Control::generaDatos(struct datosValla& datos, int numCliente, int tiempo, int precio, string url){
-	datos.url = url;
-	datos.tiempo = tiempo; 
-	datos.nombreCliente = to_string(numCliente);
+void Control::generaDatos(datosValla& datos, int numCliente, int tiempo, int precio, char* url){
+	strcpy(datos.url,url);
+	string cliente = to_string(numCliente);
+	datos.tiempo = tiempo;
+	strcpy(datos.nombreCliente, cliente.c_str());
 	datos.precio = precio;
 }
 
-void Control::colaPush(struct datosValla datos){
+void Control::colaPush(datosValla& datos){
 	unique_lock<recursive_mutex> lck(colaMtx);
 	cola.push(datos);
 	cv_cola.notify_all(); // La cola ya no esta vacia
@@ -128,4 +129,9 @@ void Control::notificarFinSubasta(){
 void Control::mostrar(string texto){
 	unique_lock<recursive_mutex> lck(textoMtx);
 	cout << texto << endl;
+}
+
+string Control::obtenerInfoSistema(){
+	string informacion;
+	return informacion;
 }

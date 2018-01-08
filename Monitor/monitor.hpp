@@ -13,6 +13,8 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <string>
+#include <cstring>
 #include "../Subastador/subastador.hpp"
 
 using namespace std;
@@ -28,8 +30,8 @@ class Control{
 	public:
 		Control();
 		void colaPop(datosValla& datos);
-		void colaPush(datosValla datos);
-		void generaDatos(datosValla& datos, int numCliente, int tiempo, int precio, string url);
+		void colaPush(datosValla& datos);
+		void generaDatos(datosValla& datos, int numCliente, int tiempo, int precio, char* url);
 		bool haTerminado();
 		void avisarFin();
 		void annadirPujador();
@@ -44,6 +46,7 @@ class Control{
 		void esperarFinSubasta();
 		void notificarFinSubasta();
 		void mostrar(string texto);
+		string obtenerInfoSistema();
 	private:
 		const int RETARDO=10;
 		bool fin;

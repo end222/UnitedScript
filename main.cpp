@@ -94,8 +94,8 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 						int tiempo = subastaActual.obtenerTiempo();
 						int precio = subastaActual.obtenerPrecioActual();
 						datosValla datos;
-						generaDatos(datosValla& datos, numCliente, tiempo, precio, buffer);
-						colaPush(datos);
+						control.generaDatos(datos, numCliente, tiempo, precio, buffer);
+						control.colaPush(datos);
 					}
 					else{ // no consigue la subasta al no llegar al precio
 						message="2";

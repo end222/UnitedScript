@@ -7,7 +7,11 @@
  * Fichero: Administrador/admin.hpp
  * Fecha: Enero 2018
  */
-#include "admin.hpp"
+
+#include "../Monitor/monitor.hpp"
+
+#define TIEMPO_SUBASTAS 45
+#define TIEMPO_ESTADISTICO 10
 
 void procesoAdministrador(Control& control){
 	this_thread::sleep_for(chrono::seconds(TIEMPO_SUBASTAS));
