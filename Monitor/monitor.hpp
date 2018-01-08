@@ -36,11 +36,9 @@ class Control{
 		void iniciarInscripcion();
 		void esperarComienzo();
 		bool seguirAceptando();
-		bool terminaRonda();
+		void terminaRonda(subasta& subastaActual);
 		void anadirRechaza(subasta& subastaActual);
 		void anadirAcepta(subasta& subastaActual);
-		void clearAceptan();
-		void clearRechazan();
 		int numeroPujadoresAceptan();
 		void esperarFinRonda();
 		void esperarFinSubasta();

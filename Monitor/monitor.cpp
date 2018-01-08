@@ -98,21 +98,13 @@ void Control::anadirAcepta(subasta& subastaActual){
 	}
 }
 
-void Control::clearAceptan(){
+void Control::terminaRonda(subasta& subastaActual){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
-	numPujadoresAceptan=0;
+	if(numPujadoresAceptan+numPujadoresRechazan==numPujadoresActivos){
+		subastaActual.incrementarPrecio();
+		numPujadoresAceptan=0;
+	}
 }
-
-void Control::clearRechazan(){
-	unique_lock<recursive_mutex> lck(pujadoresMtx);
-	numPujadoresRechazan=0;
-}
-
-bool Control::terminaRonda(){
-	unique_lock<recursive_mutex> lck(pujadoresMtx);
-	return numPujadoresAceptan+numPujadoresRechazan==numPujadoresActivos;
-}
-
 int Control::numeroPujadoresAceptan(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	return numPujadoresAceptan;
