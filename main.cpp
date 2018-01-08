@@ -69,7 +69,7 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 				// Cerramos los sockets
 				soc.Close(client_fd);
 			}
-	
+
 			mostrarMens = "Mensaje recibido del cliente " + to_string(numCliente) + ": " + buffer;
 			control.mostrar(mostrarMens);
 
@@ -135,6 +135,7 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 }
 //-------------------------------------------------------------
 int main(int argc, char *argv[]) {
+	srand(time(NULL));
 	const int N = 10;
 	// Dirección y número donde escucha el proceso servidor
 	if(argc!=2){
@@ -169,7 +170,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	thread th_inscripcion(&comenzarInscripcion);
-	thread th_administrador(&procesoAdministrador);
+	thread th_administrador(&procesoAdministrador, ref(control));
 	thread th_vallas(&procesoGestorVallas, ref(control));
 	for (int i=0; i<max_connections && control.seguirAceptando(); i++) {
 		// Accept
