@@ -122,6 +122,13 @@ int main(int argc, char * argv[]) {
 					cout << "Ha aceptado la propuesta y ha ganado. El anuncio se añadirá a la cola" <<
 						" de la valla" << endl;
 					finSubasta = true;
+					char url[500];
+					cin >> url;
+					send_bytes = socket.Send(socket_fd, url);
+					if(send_bytes == -1){
+						cerr << "Error al enviar datos: " << strerror(errno) << endl;
+						socket.Close(socket_fd);
+					}
 				}
 			}
 			subasta++;

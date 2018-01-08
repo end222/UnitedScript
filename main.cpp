@@ -84,6 +84,18 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 						subastaActual.obtenerPrecioDeReserva()){
 						message="3"; //es el ganador
 						//mete en la cola los datos del cliente y la venta
+						rcv_bytes = soc.Recv(client_fd,buffer,length);
+						if (rcv_bytes == -1) {
+							string mensError(strerror(errno));
+							cerr << "Error al recibir datos: " + mensError + "\n";
+							// Cerramos los sockets
+							soc.Close(client_fd);
+						}
+						int tiempo = subastaActual.obtenerTiempo();
+						int precio = subastaActual.obtenerPrecioActual();
+						datosValla datos;
+						generaDatos(datosValla& datos, numCliente, tiempo, precio, buffer);
+						colaPush(datos);
 					}
 					else{ // no consigue la subasta al no llegar al precio
 						message="2";
@@ -107,10 +119,7 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 					control.esperarFinSubasta();//Esperar a que todos terminen la subasta
 				}
 			}
-			if(control.terminaRonda()){
-				subastaActual.incrementarPrecio();
-				control.clearAceptan();
-			}
+			control.terminaRonda(subastaActual);
 			send_bytes = soc.Send(client_fd, message);
 			if(send_bytes == -1) {
 				string mensError(strerror(errno));
