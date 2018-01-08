@@ -29,6 +29,7 @@ class Control{
 		Control();
 		void colaPop(datosValla& datos);
 		void colaPush(datosValla datos);
+		void generaDatos(datosValla& datos, int numCliente, int tiempo, int precio, string url);
 		bool haTerminado();
 		void avisarFin();
 		void annadirPujador();

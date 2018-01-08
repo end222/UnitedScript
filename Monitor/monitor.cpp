@@ -30,6 +30,13 @@ void Control::colaPop(struct datosValla& datos){
 	cola.pop();
 }
 
+void Control::generaDatos(struct datosValla& datos, int numCliente, int tiempo, int precio, string url){
+	datos.url = url;
+	datos.tiempo = tiempo; 
+	datos.nombreCliente = to_string(numCliente);
+	datos.precio = precio;
+}
+
 void Control::colaPush(struct datosValla datos){
 	unique_lock<recursive_mutex> lck(colaMtx);
 	cola.push(datos);
