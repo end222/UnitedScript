@@ -19,6 +19,7 @@ using namespace std;
 class subasta{
 	public:
 		subasta();
+		void rehacer();
 		int obtenerPrecioSalida();
 		int obtenerTiempo();
 		int obtenerPrecioDeReserva();

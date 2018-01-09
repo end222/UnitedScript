@@ -20,6 +20,14 @@ subasta::subasta(){
 	precioActual=precioSalida;
 }
 
+void subasta::rehacer(){
+	precioSalida=rand()%91+10; //Precio entre 10 y 100
+	tiempo=precioSalida/10;
+	precioDeReserva=precioSalida*3;
+	precioDeIncremento=precioSalida/2;
+	precioActual=precioSalida;
+}
+
 int subasta::obtenerPrecioSalida(){
 	return precioSalida;
 }

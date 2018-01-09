@@ -46,6 +46,8 @@ class Control{
 		void esperarFinSubasta();
 		void notificarFinSubasta();
 		void mostrar(string texto);
+		void comprobarFin();
+		bool finSubastas();
 		string obtenerInfoSistema();
 	private:
 		const int RETARDO=10;
@@ -66,4 +68,5 @@ class Control{
 		int numPujadoresRechazan;
 		bool aceptarPujadores;
 		int precioActual;
+		bool finSubasta;
 };

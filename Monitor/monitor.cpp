@@ -135,3 +135,13 @@ string Control::obtenerInfoSistema(){
 	string informacion;
 	return informacion;
 }
+
+void Control::comprobarFin(){
+	unique_lock<recursive_mutex> lck(finMtx);
+	finSubasta = fin;
+}
+
+bool Control::finSubastas(){
+	unique_lock<recursive_mutex> lck(finMtx);
+	return finSubasta;
+}
