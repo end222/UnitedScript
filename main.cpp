@@ -38,7 +38,7 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 
 		//Inicio de la subasta
 		message="START";
-		subastaActual.rehacer();
+		
 		int send_bytes = soc.Send(client_fd, message);
 		if(send_bytes == -1) {
 			string mensError(strerror(errno));
@@ -71,15 +71,21 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 
 			mostrarMens = "Mensaje recibido del cliente " + to_string(numCliente) + ": " + buffer;
 			control.mostrar(mostrarMens);
-
+            
+                /*
+				 * Código:
+				 * 0: Ha rechazado
+				 * 1: Ha aceptado pero aún no ha ganado
+				 * 2: Ha aceptado, ha ganado, pero no llega al precio de reserva
+				 * 3: Ha aceptado, ha ganado y llega al precio de reserva
+				 */
 			if (0 == strcmp(buffer, MENS_OK)) {
 				control.anadirAcepta(subastaActual);
 
 				int numAceptan = control.numeroPujadoresAceptan();
 				if(numAceptan == 1){//Es el unico que queda
 					finSubasta = true; // Salir del bucle
-					if(subastaActual.obtenerPrecioActual()-subastaActual.obtenerPrecioDeIncremento()>=
-						subastaActual.obtenerPrecioDeReserva()){
+					if(subastaActual.obtenerPrecioActual()>=subastaActual.obtenerPrecioDeReserva()){
 						message="3"; //es el ganador
 					}
 					else{ // no consigue la subasta al no llegar al precio
@@ -93,12 +99,15 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 				}
 
 			}
+			//MENSAJE ANULADO
 			else{
 				//El cliente rechaza a voluntad la subasta
 				control.anadirRechaza(subastaActual);
 				finSubasta = true; // Salir del bucle
 				message="0";
+                //Si soy el último entonces rehago la subasta
 				if(control.numeroPujadoresAceptan()==0){
+                    subastaActual.rehacer();
 					control.comprobarFin();
 					control.notificarFinSubasta();
 				}
@@ -106,7 +115,7 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 					control.esperarFinSubasta();//Esperar a que todos terminen la subasta
 				}
 			}
-			control.terminaRonda(subastaActual);
+			
 			send_bytes = soc.Send(client_fd, message);
 			if(send_bytes == -1) {
 				string mensError(strerror(errno));
@@ -128,9 +137,11 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 				datosValla datos;
 				control.generaDatos(datos, numCliente, tiempo, precio, buffer);
 				control.colaPush(datos);
+                subastaActual.rehacer();
 				control.comprobarFin();
 				control.notificarFinSubasta();
 			}
+			control.terminaRonda(subastaActual);
 		}
 
 	}
