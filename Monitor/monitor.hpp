@@ -42,9 +42,7 @@ class Control{
 		void anadirRechaza(subasta& subastaActual);
 		void anadirAcepta(subasta& subastaActual);
 		int numeroPujadoresAceptan();
-		void esperarFinRonda();
 		void esperarFinSubasta();
-		void notificarFinSubasta();
 		void mostrar(string texto);
 		void comprobarFin();
 		bool finSubastas();
@@ -69,4 +67,6 @@ class Control{
 		bool aceptarPujadores;
 		int precioActual;
 		bool finSubasta;
+		int contador;
+		int contadorRonda;
 };

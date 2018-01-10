@@ -64,7 +64,7 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 			int rcv_bytes = soc.Recv(client_fd,buffer,length);
 			if (rcv_bytes == -1) {
 				string mensError(strerror(errno));
-	    		cerr << "Error al recibir datos: " + mensError + "\n";
+				cerr << "Error al recibir datos: " + mensError + "\n";
 				// Cerramos los sockets
 				soc.Close(client_fd);
 			}
@@ -72,13 +72,13 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 			mostrarMens = "Mensaje recibido del cliente " + to_string(numCliente) + ": " + buffer;
 			control.mostrar(mostrarMens);
             
-                /*
-				 * Código:
-				 * 0: Ha rechazado
-				 * 1: Ha aceptado pero aún no ha ganado
-				 * 2: Ha aceptado, ha ganado, pero no llega al precio de reserva
-				 * 3: Ha aceptado, ha ganado y llega al precio de reserva
-				 */
+			/*
+			 * Código:
+			 * 0: Ha rechazado
+			 * 1: Ha aceptado pero aún no ha ganado
+			 * 2: Ha aceptado, ha ganado, pero no llega al precio de reserva
+			 * 3: Ha aceptado, ha ganado y llega al precio de reserva
+			 */
 			if (0 == strcmp(buffer, MENS_OK)) {
 				control.anadirAcepta(subastaActual);
 
@@ -90,7 +90,8 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 					}
 					else{ // no consigue la subasta al no llegar al precio
 						message="2";
-						control.notificarFinSubasta();
+						subastaActual.rehacer();
+						control.esperarFinSubasta();
 					}
 				}
 				else{
@@ -105,11 +106,11 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 				control.anadirRechaza(subastaActual);
 				finSubasta = true; // Salir del bucle
 				message="0";
-                //Si soy el último entonces rehago la subasta
+				//Si soy el último entonces rehago la subasta
 				if(control.numeroPujadoresAceptan()==0){
-                    subastaActual.rehacer();
+                    			subastaActual.rehacer();
 					control.comprobarFin();
-					control.notificarFinSubasta();
+					control.esperarFinSubasta();
 				}
 				else{
 					control.esperarFinSubasta();//Esperar a que todos terminen la subasta
@@ -137,9 +138,9 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 				datosValla datos;
 				control.generaDatos(datos, numCliente, tiempo, precio, buffer);
 				control.colaPush(datos);
-                subastaActual.rehacer();
+				subastaActual.rehacer();
 				control.comprobarFin();
-				control.notificarFinSubasta();
+				control.esperarFinSubasta();
 			}
 			control.terminaRonda(subastaActual);
 		}

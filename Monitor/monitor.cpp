@@ -19,6 +19,7 @@ Control::Control(){
 	aceptarPujadores = true;
 	numPujadoresAceptan = 0;
 	numPujadoresRechazan = 0;
+	contador = 0;
 }
 
 void Control::colaPop(datosValla& datos){
@@ -101,29 +102,33 @@ void Control::anadirAcepta(subasta& subastaActual){
 
 void Control::terminaRonda(subasta& subastaActual){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
-	if(numPujadoresAceptan+numPujadoresRechazan==numPujadoresActivos){
+	if(contadorRonda + 1 == numPujadoresActivos){
+		numPujadoresAceptan = 0;
 		subastaActual.incrementarPrecio();
-		numPujadoresAceptan=0;
+		cv_finRonda.notify_all();
+		contadorRonda = 0;
+	}
+	else{
+		contadorRonda++;
+		cv_finRonda.wait(lck);
 	}
 }
+
 int Control::numeroPujadoresAceptan(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	return numPujadoresAceptan;
 }
 
-void Control::esperarFinRonda(){
-	unique_lock<recursive_mutex> lck(pujadoresMtx);
-	cv_finRonda.wait(lck);
-}
-
 void Control::esperarFinSubasta(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
-	cv_finSubasta.wait(lck);
-}
-
-void Control::notificarFinSubasta(){
-	unique_lock<recursive_mutex> lck(pujadoresMtx);
-	cv_finSubasta.notify_all();
+	if(contador + 1 == numPujadoresActivos){
+		cv_finSubasta.notify_all();
+		contador = 0;
+	}
+	else{
+		contador++;
+		cv_finSubasta.wait(lck);
+	}
 }
 
 void Control::mostrar(string texto){
