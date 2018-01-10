@@ -160,7 +160,6 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 }
 //-------------------------------------------------------------
 int main(int argc, char *argv[]) {
-	srand(time(NULL));
 	const int N = 10;
 	// Dirección y número donde escucha el proceso servidor
 	if(argc!=2){
