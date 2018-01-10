@@ -10,7 +10,7 @@
 
 #include "../Monitor/monitor.hpp"
 
-#define TIEMPO_SUBASTAS 45
+#define TIEMPO_SUBASTAS 450
 #define TIEMPO_ESTADISTICO 10
 
 void procesoAdministrador(Control& control){
