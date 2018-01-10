@@ -90,7 +90,7 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 					}
 					else{ // no consigue la subasta al no llegar al precio
 						message="2";
-						subastaActual.rehacer();
+						control.terminaRonda(subastaActual);
 						control.esperarFinSubasta();
 					}
 				}
@@ -106,13 +106,13 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 				control.anadirRechaza(subastaActual);
 				finSubasta = true; // Salir del bucle
 				message="0";
-				//Si soy el último entonces rehago la subasta
 				if(control.numeroPujadoresAceptan()==0){
-                    			subastaActual.rehacer();
+					control.terminaRonda(subastaActual);
 					control.comprobarFin();
 					control.esperarFinSubasta();
 				}
-				else{
+				else{			
+					control.terminaRonda(subastaActual);
 					control.esperarFinSubasta();//Esperar a que todos terminen la subasta
 				}
 			}
@@ -138,11 +138,13 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 				datosValla datos;
 				control.generaDatos(datos, numCliente, tiempo, precio, buffer);
 				control.colaPush(datos);
-				subastaActual.rehacer();
+				control.terminaRonda(subastaActual);
 				control.comprobarFin();
 				control.esperarFinSubasta();
 			}
-			control.terminaRonda(subastaActual);
+			else if(message == "1"){
+				control.terminaRonda(subastaActual);
+			}
 		}
 
 	}

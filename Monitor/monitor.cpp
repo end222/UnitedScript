@@ -14,12 +14,14 @@ using namespace std;
 
 Control::Control(){
 	fin = false;
-	numPujadoresTotal = 0;
 	numPujadoresActivos = 0;
+	numPujadoresJugando = 0;
 	aceptarPujadores = true;
 	numPujadoresAceptan = 0;
 	numPujadoresRechazan = 0;
 	contador = 0;
+	tiempoMostrado = 0;
+	tiempoEstimado = 0;
 }
 
 void Control::colaPop(datosValla& datos){
@@ -28,6 +30,7 @@ void Control::colaPop(datosValla& datos){
 		cv_cola.wait(lck);
 	}
 	datos = cola.front();
+	tiempoMostrado += datos.tiempo;
 	cola.pop();
 }
 
@@ -42,6 +45,7 @@ void Control::generaDatos(datosValla& datos, int numCliente, int tiempo, int pre
 void Control::colaPush(datosValla& datos){
 	unique_lock<recursive_mutex> lck(colaMtx);
 	cola.push(datos);
+	tiempoEstimado += datos.tiempo;
 	cv_cola.notify_all(); // La cola ya no esta vacia
 }
 
@@ -57,8 +61,8 @@ void Control::avisarFin(){
 
 void Control::annadirPujador(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
-	numPujadoresTotal++;
 	numPujadoresActivos++;
+	numPujadoresJugando++;
 }
 
 void Control::iniciarInscripcion(){
@@ -102,9 +106,15 @@ void Control::anadirAcepta(subasta& subastaActual){
 
 void Control::terminaRonda(subasta& subastaActual){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
-	if(contadorRonda + 1 == numPujadoresActivos){
-		numPujadoresAceptan = 0;
+	if(contadorRonda + 1 == numPujadoresJugando){
+		numPujadoresJugando = numPujadoresAceptan;
 		subastaActual.incrementarPrecio();
+		if(numPujadoresAceptan <= 1){
+			numPujadoresJugando = numPujadoresActivos;
+			numPujadoresRechazan = 0;
+			subastaActual.rehacer();
+		}
+		numPujadoresAceptan = 0;
 		cv_finRonda.notify_all();
 		contadorRonda = 0;
 	}
@@ -149,4 +159,8 @@ void Control::comprobarFin(){
 bool Control::finSubastas(){
 	unique_lock<recursive_mutex> lck(finMtx);
 	return finSubasta;
+}
+
+int Control::tamanoCola(){
+	return cola.size();
 }

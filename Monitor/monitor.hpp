@@ -47,6 +47,7 @@ class Control{
 		void comprobarFin();
 		bool finSubastas();
 		string obtenerInfoSistema();
+		int tamanoCola();
 	private:
 		const int RETARDO=10;
 		bool fin;
@@ -60,13 +61,16 @@ class Control{
 		condition_variable_any cv_finRonda;
 		condition_variable_any cv_finSubasta;
 		queue<datosValla> cola;
-		int numPujadoresTotal;
 		int numPujadoresActivos;
 		int numPujadoresAceptan;
 		int numPujadoresRechazan;
+		int numPujadoresJugando;
 		bool aceptarPujadores;
 		int precioActual;
 		bool finSubasta;
 		int contador;
 		int contadorRonda;
+		int tiempoMostrado;
+		int tiempoEstimado;
+		int totalEncolados;
 };

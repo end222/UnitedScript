@@ -32,7 +32,7 @@ void procesoGestorVallas(Control& control){
 	const int VALLA_HEIGHT = 300;
 	char path[100] = "image.jpg";
 	ImageDownloader downloader;
-	while(!control.finSubastas() || !control.colaVacia()){
+	while(!control.finSubastas() || control.tamanoCola() != 0){ 
 		control.colaPop(datos);
 
 		downloader.downloadImage(datos.url, path);
