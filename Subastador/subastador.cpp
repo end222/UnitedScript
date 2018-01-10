@@ -21,6 +21,7 @@ using namespace std;
  *		precio de salida, y un precio actual correspondiente al precio de salida.
  */
 subasta::subasta(){
+	srand(time(NULL));
 	precioSalida=rand()%91+10; //Precio entre 10 y 100
 	tiempo=precioSalida/10;
 	precioDeReserva=precioSalida*3;
