@@ -17,14 +17,22 @@
 using namespace cimg_library;
 using namespace std;
 
+/*
+ * PRE:
+ * POST: Mientras se estén realizando subastas, procesa peticiones de poner
+ *		imágenes en vallas que se encuentren en cola. Al procesar una petición,
+ *		muestra durante un tiempo determinado en una ventana la imagen que se
+ *		encuentra en la URL de la petición. Si el tiempo de subastas ya ha
+ *		acabado pero se encuentran peticiones en cola, continúa ejecutándose
+ *		hasta procesar todas ellas.
+ */
 void procesoGestorVallas(Control& control){
-
 	struct datosValla datos;
 	const int VALLA_WIDTH = 800;
-	const int VALLA_HEIGHT = 800;
+	const int VALLA_HEIGHT = 300;
 	char path[100] = "image.jpg";
 	ImageDownloader downloader;
-	while(!control.haTerminado()){
+	while(!control.finSubastas() || !control.colaVacia()){
 		control.colaPop(datos);
 
 		downloader.downloadImage(datos.url, path);
