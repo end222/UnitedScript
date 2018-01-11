@@ -7,6 +7,10 @@
 #include "GestorVallas/gestor.hpp"
 #include "Administrador/admin.hpp"
 #include <thread>
+#include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <cstring> //manejo de cadenas tipo C
 
 using namespace std;
@@ -22,6 +26,13 @@ void comenzarInscripcion(){
 	control.iniciarInscripcion();
 }
 
+
+void controlc(int signum){
+	cout << "Se ha recibido un ctrl+c, el programa terminará cuando la subasta actual llegue a su fin" << endl;
+	control.avisarFin();
+        control.notifyCola();
+}
+	
 //-------------------------------------------------------------
 void clienteParaNoBloquearAccept(int ServerPort){
         control.esperarComienzo();
@@ -177,6 +188,7 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 }
 //-------------------------------------------------------------
 int main(int argc, char *argv[]) {
+	signal (SIGINT,controlc);
 	const int N = 10;
 	// Dirección y número donde escucha el proceso servidor
 	if(argc!=2){
@@ -236,8 +248,10 @@ int main(int argc, char *argv[]) {
 	for (int i=0; i<control.totalPujadores(); i++) {
 		cliente[i].join();
 	}
-	
-	th_administrador.join();
+
+	// Destruimos el thread administrador dado que en el caso de que haya un ctrl+c el thread estará dormido y bloqueará el main	
+	th_administrador.detach();
+	th_administrador.~thread();
 	control.avisarFinGestor();
 	th_estadistico.join();
 	control.notifyCola();
@@ -256,5 +270,6 @@ int main(int argc, char *argv[]) {
 	cout << "Bye bye" << endl;
 
 	return error_code;
+
 }
 //-------------------------------------------------------------
