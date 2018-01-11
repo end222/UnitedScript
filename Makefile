@@ -25,37 +25,36 @@ LDFLAGS=-L/usr/X11R6/lib -L/usr/local/lib -lm -pthread -lcurl -lX11
 all: ${target}
 
 ${MAIN}: ${MAIN}.o imageDownloader.o admin.o gestor.o subastador.o monitor.o Socket.o
-	${CC} ImageDownloader.o admin.o gestor.o subastador.o monitor.o Socket.o ${MAIN}.o -o ${MAIN} ${LDFLAGS}
+	${CC} ImageDownloader.o admin.o gestor.o subastador.o monitor.o Socket.o ${MAIN}.o -o bin/${MAIN} ${LDFLAGS}
 
-${MAIN}.o: ${MAIN}.cpp 
-	${CC} -c ${CPPFLAGS} ${MAIN}.cpp
+${MAIN}.o: src/${MAIN}.cpp 
+	${CC} -c ${CPPFLAGS} src/${MAIN}.cpp
 
-imageDownloader.o: ${imageDownloader}.hpp ${imageDownloader}.cpp
-	${CC} -c ${CPPFLAGS} ${imageDownloader}.cpp
+imageDownloader.o: src/${imageDownloader}.hpp src/${imageDownloader}.cpp
+	${CC} -c ${CPPFLAGS} src/${imageDownloader}.cpp
 
-gestor.o: GestorVallas/gestor.cpp GestorVallas/gestor.hpp
-	${CC} -c ${CPPFLAGS} GestorVallas/gestor.cpp 
+gestor.o: src/GestorVallas/gestor.cpp src/GestorVallas/gestor.hpp
+	${CC} -c ${CPPFLAGS} src/GestorVallas/gestor.cpp 
 
-admin.o: Administrador/admin.hpp Administrador/admin.cpp
-	${CC} -c ${CPPFLAGS} Administrador/admin.cpp
+admin.o: src/Administrador/admin.hpp src/Administrador/admin.cpp
+	${CC} -c ${CPPFLAGS} src/Administrador/admin.cpp
 
-subastador.o: Subastador/subastador.hpp Subastador/subastador.cpp
-	${CC} -c ${CPPFLAGS} Subastador/subastador.cpp
+subastador.o: src/Subastador/subastador.hpp src/Subastador/subastador.cpp
+	${CC} -c ${CPPFLAGS} src/Subastador/subastador.cpp
 
-monitor.o: Monitor/monitor.hpp Monitor/monitor.cpp
-	${CC} -c ${CPPFLAGS} Monitor/monitor.cpp
+monitor.o: src/Monitor/monitor.hpp src/Monitor/monitor.cpp
+	${CC} -c ${CPPFLAGS} src/Monitor/monitor.cpp
 
-Socket.o: Socket/Socket.cpp Socket/Socket.hpp
-	${CC} -c ${CPPFLAGS} Socket/Socket.cpp
+Socket.o: src/Socket/Socket.cpp src/Socket/Socket.hpp
+	${CC} -c ${CPPFLAGS} src/Socket/Socket.cpp
 
-cliente: Socket.o Cliente/cliente.cpp
-	${CC} -c ${CPPFLAGS} Cliente/cliente.cpp
-	${CC} cliente.o Socket.o -o cliente ${LDFLAGS}
+cliente: Socket.o src/Cliente/cliente.cpp
+	${CC} -c ${CPPFLAGS} src/Cliente/cliente.cpp
+	${CC} cliente.o Socket.o -o bin/cliente ${LDFLAGS}
 
 clean:
 	$(RM) *.o
-	$(RM) ${target}
-	$(RM) cliente
+	$(RM) bin/*
 
 echo:
 	echo ${target}

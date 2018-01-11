@@ -18,14 +18,28 @@ using namespace std;
 const int MESSAGE_SIZE = 4001; //mensajes de no más 4000 caracteres
 
 int main(int argc, char * argv[]) {
-	if(argc != 3){
+	srand(time(NULL));
+	bool automatico;
+	int opcion;
+
+	if(argc != 4){
 		cerr << "Numero de parametros incorrecto\n";
+		cerr << "./cliente <dirección> <puerto> <automatico/manual>" << endl;
 		exit(1);
 	}
 
 	// Dirección y número donde escucha el proceso servidor
 	string SERVER_ADDRESS = argv[1];
 	int SERVER_PORT = atoi(argv[2]);
+	if(strcmp(argv[3],"automatico")==0){
+		automatico = true;
+	}
+	else if(strcmp(argv[3],"manual")==0){
+		automatico = false;
+	}
+	else{
+		cerr << "No se ha reconocido el tercer parámetro. Escriba 'automatico' o 'manual'" << endl;
+	}
 
 	// Creación del socket con el que se llevará a cabo
 	// la comunicación con el servidor.
@@ -77,16 +91,28 @@ int main(int argc, char * argv[]) {
 				cout << "Precio propuesto: " << buffer;
 				cout << "¿Acepta la propuesta? (si/no)" << endl;
 				cout << "=============================" << endl;
-				cin >> mensaje;
 				ronda++;
 				int send_bytes;
-
-				if(mensaje == "si"){
-					send_bytes = socket.Send(socket_fd, aceptar);
+				if(automatico){
+					opcion = rand()%2;
+					if(opcion == 0){
+						send_bytes = socket.Send(socket_fd, rechazar);
+					}
+					else{
+						send_bytes = socket.Send(socket_fd, aceptar);
+					}
+					// Espera 3 segundos entre respuesta y respuesta para facilitar la visualizacion
+					this_thread::sleep_for(chrono::seconds(3));
 				}
-
 				else{
-					send_bytes = socket.Send(socket_fd, rechazar);
+					cin >> mensaje;
+					if(mensaje == "si"){
+						send_bytes = socket.Send(socket_fd, aceptar);
+					}
+
+					else{
+						send_bytes = socket.Send(socket_fd, rechazar);
+					}
 				}
 
 				if(send_bytes == -1){
@@ -121,9 +147,17 @@ int main(int argc, char * argv[]) {
 				else{
 					cout << "Ha aceptado la propuesta y ha ganado. El anuncio se añadirá a la cola" <<
 						" de la valla" << endl;
-					finSubasta = true;
+					cout << "Escriba la URL: " << flush;
 					char url[500];
-					cin >> url;
+					if(automatico){
+						// Esperar otros 3 segundos para facilitar visualizacion
+						this_thread::sleep_for(chrono::seconds(3));
+						strcpy(url,"https://naval.cat/publi/cocacola.jpg");
+					}
+					else{
+						cin >> url;
+					}
+					finSubasta = true;
 					send_bytes = socket.Send(socket_fd, url);
 					if(send_bytes == -1){
 						cerr << "Error al enviar datos: " << strerror(errno) << endl;
