@@ -26,6 +26,7 @@
 void procesoAdministrador(Control& control){
 	this_thread::sleep_for(chrono::seconds(TIEMPO_SUBASTAS));
 	control.avisarFin();
+	control.notifyCola();
 }
 
 /*

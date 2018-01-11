@@ -212,16 +212,22 @@ int main(int argc, char *argv[]) {
 			control.annadirPujador(); //incrementa en un unidad el número de pujadores
 		}
 	}
-
+	cout << "0" << endl;
 	th_inscripcion.join();
-
+	cout << "1" << endl;
 	//¿Qué pasa si algún thread acaba inesperadamente?
 	for (int i=0; i<max_connections; i++) {
 		cliente[i].join();
 	}
+	cout << "A" << endl;
 	th_administrador.join();
+	cout << "B" << endl;
+	control.avisarFinGestor();
+	cout << "C" << endl;
+	control.notifyCola();
+	cout << "D" << endl;
 	th_vallas.join();
-
+	cout << "E" << endl;
 
     // Cerramos el socket del servidor
     error_code = socket.Close(socket_fd);

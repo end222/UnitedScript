@@ -14,6 +14,7 @@ using namespace std;
 
 Control::Control(){
 	fin = false;
+	finGestor = false;
 	numPujadoresActivos = 0;
 	numPujadoresJugando = 0;
 	aceptarPujadores = true;
@@ -24,14 +25,32 @@ Control::Control(){
 	tiempoEstimado = 0;
 }
 
-void Control::colaPop(datosValla& datos){
+void Control::avisarFinGestor(){
 	unique_lock<recursive_mutex> lck(colaMtx);
-	while(cola.empty()){
+	finGestor = true;
+}
+
+bool Control::colaPop(datosValla& datos){
+	unique_lock<recursive_mutex> lck(colaMtx);
+	cout << cola.empty() << endl;
+	if(cola.empty() && !finGestor){
 		cv_cola.wait(lck);
 	}
-	datos = cola.front();
-	tiempoMostrado += datos.tiempo;
-	cola.pop();
+
+	if(!cola.empty()){
+		datos = cola.front();
+		tiempoMostrado += datos.tiempo;
+		cola.pop();
+		return 1;
+	}
+	else{
+		return 0;
+	}
+}
+
+int Control::totalPujadores(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx);
+	return numPujadoresActivos;
 }
 
 void Control::generaDatos(datosValla& datos, int numCliente, int tiempo, int precio, char* url){
@@ -47,6 +66,11 @@ void Control::colaPush(datosValla& datos){
 	cola.push(datos);
 	tiempoEstimado += datos.tiempo;
 	cv_cola.notify_all(); // La cola ya no esta vacia
+}
+
+void Control::notifyCola(){
+	unique_lock<recursive_mutex> lck(colaMtx);
+	cv_cola.notify_all();
 }
 
 bool Control::haTerminado(){

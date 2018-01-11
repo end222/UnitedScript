@@ -29,11 +29,12 @@ struct datosValla{
 class Control{
 	public:
 		Control();
-		void colaPop(datosValla& datos);
+		bool colaPop(datosValla& datos);
 		void colaPush(datosValla& datos);
 		void generaDatos(datosValla& datos, int numCliente, int tiempo, int precio, char* url);
 		bool haTerminado();
 		void avisarFin();
+		void avisarFinGestor();
 		void annadirPujador();
 		void iniciarInscripcion();
 		void esperarComienzo();
@@ -48,9 +49,12 @@ class Control{
 		bool finSubastas();
 		string obtenerInfoSistema();
 		int tamanoCola();
+		void notifyCola();
+		int totalPujadores();
 	private:
 		const int RETARDO=10;
 		bool fin;
+		bool finGestor;
 		recursive_mutex finMtx;
 		recursive_mutex colaMtx;
 		recursive_mutex pujadoresMtx;
