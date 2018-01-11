@@ -9,9 +9,16 @@
  */
 
 #include "monitor.hpp"
-
 using namespace std;
 
+/*
+ * PRE:
+ * POST: Construye la clase Control que se usa como monitor. Inicializa parte de
+ * 		las variables internas de Control. Pone los booleanos fin y finGestor a falso
+ *		y aceptarPujadores a true. También inicializa a 0 los enteros numPujadoresActivos,
+ *		numPujadoresJugando, aceptarPujadores, numPujadoresAceptan, numPujadoresRechazan,
+ *		contador, tiempoMostrado y tiempoEstimado.
+ */
 Control::Control(){
 	fin = false;
 	finGestor = false;
@@ -25,18 +32,26 @@ Control::Control(){
 	tiempoEstimado = 0;
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST: Cambia el valor del booleano finGestor a true, para que de esta manera
+ *		el gestor de vallas conozca cuando debe terminar.
+ */
 void Control::avisarFinGestor(){
 	unique_lock<recursive_mutex> lck(colaMtx);
 	finGestor = true;
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST: 
+ */
 bool Control::colaPop(datosValla& datos){
 	unique_lock<recursive_mutex> lck(colaMtx);
 	cout << cola.empty() << endl;
 	if(cola.empty() && !finGestor){
 		cv_cola.wait(lck);
 	}
-
 	if(!cola.empty()){
 		datos = cola.front();
 		tiempoMostrado += datos.tiempo;
@@ -48,11 +63,19 @@ bool Control::colaPop(datosValla& datos){
 	}
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 int Control::totalPujadores(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	return numPujadoresActivos;
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 void Control::generaDatos(datosValla& datos, int numCliente, int tiempo, int precio, char* url){
 	strcpy(datos.url,url);
 	string cliente = to_string(numCliente);
@@ -61,6 +84,10 @@ void Control::generaDatos(datosValla& datos, int numCliente, int tiempo, int pre
 	datos.precio = precio;
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 void Control::colaPush(datosValla& datos){
 	unique_lock<recursive_mutex> lck(colaMtx);
 	cola.push(datos);
@@ -69,27 +96,47 @@ void Control::colaPush(datosValla& datos){
 	cv_cola.notify_all(); // La cola ya no esta vacia
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 void Control::notifyCola(){
 	unique_lock<recursive_mutex> lck(colaMtx);
 	cv_cola.notify_all();
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 bool Control::haTerminado(){
 	unique_lock<recursive_mutex> lck(finMtx);
 	return fin;
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 void Control::avisarFin(){
 	unique_lock<recursive_mutex> lck(finMtx);
 	fin=true;
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 void Control::annadirPujador(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	numPujadoresActivos++;
 	numPujadoresJugando++;
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 void Control::iniciarInscripcion(){
 	this_thread::sleep_for(chrono::seconds(RETARDO));
 	unique_lock<recursive_mutex> lck(inscripcionMtx);
@@ -97,16 +144,28 @@ void Control::iniciarInscripcion(){
 	cv_comenzar.notify_all();
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 void Control::esperarComienzo(){
 	unique_lock<recursive_mutex> lck(inscripcionMtx);
 	cv_comenzar.wait(lck);
 }
 
+/*
+ * PRE:
+ * POST:
+ */
 bool Control::seguirAceptando(){
 	unique_lock<recursive_mutex> lck(inscripcionMtx);
 	return aceptarPujadores;
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 void Control::anadirRechaza(subasta& subastaActual){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	numPujadoresRechazan++;
@@ -118,6 +177,10 @@ void Control::anadirRechaza(subasta& subastaActual){
 	}
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 void Control::anadirAcepta(subasta& subastaActual){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	numPujadoresAceptan++;
@@ -129,6 +192,10 @@ void Control::anadirAcepta(subasta& subastaActual){
 	}
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 void Control::terminaRonda(subasta& subastaActual){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	if(contadorRonda + 1 == numPujadoresJugando){
@@ -149,11 +216,19 @@ void Control::terminaRonda(subasta& subastaActual){
 	}
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 int Control::numeroPujadoresAceptan(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	return numPujadoresAceptan;
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 void Control::esperarFinSubasta(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	if(contador + 1 == numPujadoresActivos){
@@ -166,11 +241,19 @@ void Control::esperarFinSubasta(){
 	}
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 void Control::mostrar(string texto){
 	unique_lock<recursive_mutex> lck(textoMtx);
 	cout << texto << endl;
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 string Control::obtenerInfoSistema(){
 	unique_lock<recursive_mutex> lck(colaMtx);
 	string informacion;
@@ -186,16 +269,28 @@ string Control::obtenerInfoSistema(){
 	return informacion;
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 void Control::comprobarFin(){
 	unique_lock<recursive_mutex> lck(finMtx);
 	finSubasta = fin;
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 bool Control::finSubastas(){
 	unique_lock<recursive_mutex> lck(finMtx);
 	return finSubasta;
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
 int Control::tamanoCola(){
 	return cola.size();
 }
