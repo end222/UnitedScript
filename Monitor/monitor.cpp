@@ -33,7 +33,7 @@ Control::Control(){
 }
 
 /*
- * PRE: Se ha construido Control
+ * PRE: Se ha construido Control.
  * POST: Cambia el valor del booleano finGestor a true, para que de esta manera
  *		el gestor de vallas conozca cuando debe terminar.
  */
@@ -43,8 +43,15 @@ void Control::avisarFinGestor(){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST: 
+ * PRE: Se ha construido Control.
+ * POST: Mientras el gestor de vallas no debe terminar aún y la cola se
+ *		encuentre vacía, espera a que la cola deje de estar vacía. Una vez
+ *		esto suceda, comprueba si la cola está vacía. Si contiene algún
+ *		elemento, asocia a datos el primer elemento de la cola, suma a
+ *		tiempoMostrado el tiempo asociado a ese elemento, hace pop de ese
+ *		elemento de la cola y finalmente devuelve true. En cambio, si en la
+ *		comprobación detecta que la cola sigue vacía, se limita a devolver
+ *		false. Los datos son devueltos por referencia.
  */
 bool Control::colaPop(datosValla& datos){
 	unique_lock<recursive_mutex> lck(colaMtx);
@@ -64,8 +71,8 @@ bool Control::colaPop(datosValla& datos){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Devuelve el número de pujadores activos de la subasta
  */
 int Control::totalPujadores(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
@@ -73,8 +80,11 @@ int Control::totalPujadores(){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Asocia los diferentes datos que se proporcian por referencia a la
+ *		variable datos, de tal manera que la url de datos es url, el
+ *		cliente es numCliente, el tiempo es tiempo, nombreCliente es
+ *		cliente y precio es precio. Devuelve datos por referencia.
  */
 void Control::generaDatos(datosValla& datos, int numCliente, int tiempo, int precio, char* url){
 	strcpy(datos.url,url);
@@ -85,8 +95,11 @@ void Control::generaDatos(datosValla& datos, int numCliente, int tiempo, int pre
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Introduce un nuevo elemento datos a la cola, incrementa en una
+ *		unidad en el número de encolados, incrementa tiempoEstimado en el
+ *		tiempo asociado a los datos y notifica a las funciones que estén
+ *		esperando con la variable condición cv_cola.
  */
 void Control::colaPush(datosValla& datos){
 	unique_lock<recursive_mutex> lck(colaMtx);
@@ -97,8 +110,9 @@ void Control::colaPush(datosValla& datos){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Notifica a las funciones que estén	esperando con la variable
+ *		condición cv_cola.
  */
 void Control::notifyCola(){
 	unique_lock<recursive_mutex> lck(colaMtx);
@@ -106,8 +120,9 @@ void Control::notifyCola(){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Devuelve true si se ha indicado que las subastas deben acabar y
+ *		false en caso contrario.
  */
 bool Control::haTerminado(){
 	unique_lock<recursive_mutex> lck(finMtx);
@@ -115,8 +130,8 @@ bool Control::haTerminado(){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Indica que las subastas deben acabar.
  */
 void Control::avisarFin(){
 	unique_lock<recursive_mutex> lck(finMtx);
@@ -124,8 +139,9 @@ void Control::avisarFin(){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Incrementa en una unidad el número de pujadores activos y el
+ *		número de pujadores jugando.
  */
 void Control::annadirPujador(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
@@ -134,8 +150,10 @@ void Control::annadirPujador(){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Después de dormirse durante un tiempo determinado, indica que se
+ *		debe dejar de aceptar pujadores y notifica a todos los procesos
+ *		que estuvieran esperando la variable condición cv_comenzar.
  */
 void Control::iniciarInscripcion(){
 	this_thread::sleep_for(chrono::seconds(RETARDO));
@@ -145,8 +163,9 @@ void Control::iniciarInscripcion(){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Espera hasta que se notifique a la variable condición
+ *		cv_comenzar.
  */
 void Control::esperarComienzo(){
 	unique_lock<recursive_mutex> lck(inscripcionMtx);
@@ -154,8 +173,9 @@ void Control::esperarComienzo(){
 }
 
 /*
- * PRE:
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Devuelve true si se deben seguir aceptando pujadores a la subasta
+ *		y false en caso contrario.
  */
 bool Control::seguirAceptando(){
 	unique_lock<recursive_mutex> lck(inscripcionMtx);
@@ -163,8 +183,13 @@ bool Control::seguirAceptando(){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Incrementa en una unidad el número de pujadores que rechazan el
+ *		precio sugerido por el subastador. Si el número de pujadores que
+ *		han aceptado es igual al número de pujadores que han rechazado,
+ *		es decir, que todos los pujadores han respondido a la sugerencia.
+ *		notifica a la variable condición cv_finRonda. En caso contrario,
+ *		espera hasta que se notifique a la variable condición cv_finRonda.
  */
 void Control::anadirRechaza(subasta& subastaActual){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
@@ -178,8 +203,13 @@ void Control::anadirRechaza(subasta& subastaActual){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Incrementa en una unidad el número de pujadores que aceptan el
+ *		precio sugerido por el subastador. Si el número de pujadores que
+ *		han aceptado es igual al número de pujadores que han rechazado,
+ *		es decir, que todos los pujadores han respondido a la sugerencia.a
+ *		notifica a la variable condición cv_finRonda. En caso contrario,
+ *		espera hasta que se notifique a la variable condición cv_finRonda.
  */
 void Control::anadirAcepta(subasta& subastaActual){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
@@ -193,8 +223,22 @@ void Control::anadirAcepta(subasta& subastaActual){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Si es el último pujador de la ronda que ejecuta esta función,
+ *		asigna al número de pujadores jugando el número de pujadores que
+ *		han aceptado en la ronda. Incrementa el precio de la subasta para
+ *		la siguiente ronda. Si solo ha aceptado un pujador ha aceptado en
+ *		la ronda o ninguno la ha aceptado, el numero de pujadores jugando
+ *		pasa a ser el número de pujadores activos, se pone a 0 el número de
+ *		pujadores que han rechazado y se rehace la subasta.
+ *		Independientemente de si se cumple esta última condición, se pone a
+ *		0 el numero de pujadores que han aceptado, se notifica a la
+ *		variable condición cv_finRonda y se pone a 0 el contador de
+ *		jugadores que han participado en la ronda.
+ *		En cambio, si el pujador que ejecuta esta función no es último,
+ *		suma uno al contador de pujadores que han participado en la ronda,
+ *		y se mantiene esperando a que se notifique a la variable condición
+ *		cv_finRonda.
  */
 void Control::terminaRonda(subasta& subastaActual){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
@@ -217,8 +261,8 @@ void Control::terminaRonda(subasta& subastaActual){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Devuelve el número de pujadores que han aceptado durante la ronda.
  */
 int Control::numeroPujadoresAceptan(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
@@ -226,8 +270,12 @@ int Control::numeroPujadoresAceptan(){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Si es el último pujador de la ronda que ejecuta esta función,
+ *		se notifica a la variable condición cv_finRonda y se pone a 0 el
+ *		contador. En caso contrario, aumenta en una unidad el contador y
+ *		se mantiene esperando a que se notifique a la variable condición
+ *		cv_finRonda.
  */
 void Control::esperarFinSubasta(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
@@ -242,8 +290,8 @@ void Control::esperarFinSubasta(){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Muestra por pantalla el string texto que se pasa por referencia.
  */
 void Control::mostrar(string texto){
 	unique_lock<recursive_mutex> lck(textoMtx);
@@ -252,7 +300,11 @@ void Control::mostrar(string texto){
 
 /*
  * PRE: Se ha construido Control
- * POST:
+ * POST: Devuelve un string que contiene distinta información estadística:
+ *		el número de imágenes mostradas, el tiempo total de imágenes
+ *		mostradas, el tiempo medio que se han mostrado las imágenes, el
+ *		número de peticiones que se encuentran encoladas en el momento que
+ *		se ejecuta la función y el tiempo contratado estimado.
  */
 string Control::obtenerInfoSistema(){
 	unique_lock<recursive_mutex> lck(colaMtx);
@@ -270,8 +322,9 @@ string Control::obtenerInfoSistema(){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Comprueba si el administrador ha indicado que se deben finalizar
+ *		las subastas.
  */
 void Control::comprobarFin(){
 	unique_lock<recursive_mutex> lck(finMtx);
@@ -279,8 +332,9 @@ void Control::comprobarFin(){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Devuelve el true si se deben finalizar las subastas y false en
+ *		caso contrario.
  */
 bool Control::finSubastas(){
 	unique_lock<recursive_mutex> lck(finMtx);
@@ -288,8 +342,8 @@ bool Control::finSubastas(){
 }
 
 /*
- * PRE: Se ha construido Control
- * POST:
+ * PRE: Se ha construido Control.
+ * POST: Devuelve el tamaño de la cola.
  */
 int Control::tamanoCola(){
 	return cola.size();
