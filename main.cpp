@@ -23,6 +23,23 @@ void comenzarInscripcion(){
 }
 
 //-------------------------------------------------------------
+void clienteParaNoBloquearAccept(int ServerPort){
+        control.esperarComienzo();
+        string SERVER_ADDRESS = "localhost";
+        int SERVER_PORT = ServerPort;
+        Socket socket(SERVER_ADDRESS, ServerPort);
+        int socket_fd = socket.Connect();
+        if(socket_fd == -1){
+                control.mostrar("El servidor no se encontraba bloqueado en un accept, seguramente ocurra esto porque ya se ha conectado el máximo de clientes que acepta el servidor");
+        }
+        else{
+                int error_code = socket.Close(socket_fd);
+                if(error_code == -1){
+                        cerr << "Error cerrando el socket: " << strerror(errno) << endl;
+                }
+        }
+}
+
 void servCliente(Socket& soc, int client_fd, int numCliente) {
 	control.esperarComienzo();
 
@@ -197,13 +214,14 @@ int main(int argc, char *argv[]) {
 	thread th_administrador(&procesoAdministrador, ref(control));
 	thread th_estadistico(&estadistico, ref(control));
 	thread th_vallas(&procesoGestorVallas, ref(control));
+	thread noBloq(&clienteParaNoBloquearAccept, SERVER_PORT);
 	for (int i=0; i<max_connections && control.seguirAceptando(); i++) {
 		// Accept
 		client_fd[i] = socket.Accept();
 		if(control.seguirAceptando()){
 			if(client_fd[i] == -1) {
 				string mensError(strerror(errno));
-    			cerr << "Error en el accept: " + mensError + "\n";
+				cerr << "Error en el accept: " + mensError + "\n";
 				// Cerramos el socket
 				socket.Close(socket_fd);
 				exit(1);
@@ -213,33 +231,30 @@ int main(int argc, char *argv[]) {
 			control.annadirPujador(); //incrementa en un unidad el número de pujadores
 		}
 	}
-	cout << "0" << endl;
 	th_inscripcion.join();
-	cout << "1" << endl;
-	//¿Qué pasa si algún thread acaba inesperadamente?
-	for (int i=0; i<max_connections; i++) {
+
+	for (int i=0; i<control.totalPujadores(); i++) {
 		cliente[i].join();
 	}
-	cout << "A" << endl;
+	
 	th_administrador.join();
-	cout << "B" << endl;
 	control.avisarFinGestor();
-	cout << "C" << endl;
 	th_estadistico.join();
 	control.notifyCola();
-	cout << "D" << endl;
 	th_vallas.join();
-	cout << "E" << endl;
+	noBloq.join();
+    
+	// Cerramos el socket del servidor
+    
+	error_code = socket.Close(socket_fd);
 
-    // Cerramos el socket del servidor
-    error_code = socket.Close(socket_fd);
-    if (error_code == -1) {
+	if (error_code == -1) {
 		string mensError(strerror(errno));
-    	cerr << "Error cerrando el socket del servidor: " + mensError + "\n";
+		cerr << "Error cerrando el socket del servidor: " + mensError + "\n";
 	}
 	// Mensaje de despedida
 	cout << "Bye bye" << endl;
 
-    return error_code;
+	return error_code;
 }
 //-------------------------------------------------------------
