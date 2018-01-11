@@ -9,6 +9,7 @@
  */
 
 #include "../Monitor/monitor.hpp"
+#include "admin.hpp"
 
 #define TIEMPO_SUBASTAS 450
 #define TIEMPO_ESTADISTICO 10

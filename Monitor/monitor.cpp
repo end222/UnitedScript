@@ -64,6 +64,7 @@ void Control::generaDatos(datosValla& datos, int numCliente, int tiempo, int pre
 void Control::colaPush(datosValla& datos){
 	unique_lock<recursive_mutex> lck(colaMtx);
 	cola.push(datos);
+	totalEncolados++;
 	tiempoEstimado += datos.tiempo;
 	cv_cola.notify_all(); // La cola ya no esta vacia
 }
@@ -171,7 +172,17 @@ void Control::mostrar(string texto){
 }
 
 string Control::obtenerInfoSistema(){
+	unique_lock<recursive_mutex> lck(colaMtx);
 	string informacion;
+	informacion="=============================\nInformacion historica del sistema\n\n";
+	informacion+="Numero de imagenes mostradas: "+to_string(totalEncolados-cola.size());
+	informacion+="\nTiempo total de imagenes mostradas: "+to_string(tiempoMostrado);
+	informacion+="\nTiempo medio de imagenes mostradas: "
+	+to_string((double)(totalEncolados-cola.size())/(double)tiempoMostrado);
+	informacion+="\n-----------------------------\nInformacion del estado del sistema\n\n";
+	informacion+="Numero de peticiones encoladas: "+to_string(cola.size());
+	informacion+="\nTiempo contratado estimado: "+to_string(tiempoEstimado);
+	informacion+="\n=============================";
 	return informacion;
 }
 

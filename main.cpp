@@ -38,7 +38,7 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 
 		//Inicio de la subasta
 		message="START";
-		
+
 		int send_bytes = soc.Send(client_fd, message);
 		if(send_bytes == -1) {
 			string mensError(strerror(errno));
@@ -71,7 +71,7 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 
 			mostrarMens = "Mensaje recibido del cliente " + to_string(numCliente) + ": " + buffer;
 			control.mostrar(mostrarMens);
-            
+
 			/*
 			 * Código:
 			 * 0: Ha rechazado
@@ -111,12 +111,12 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 					control.comprobarFin();
 					control.esperarFinSubasta();
 				}
-				else{			
+				else{
 					control.terminaRonda(subastaActual);
 					control.esperarFinSubasta();//Esperar a que todos terminen la subasta
 				}
 			}
-			
+
 			send_bytes = soc.Send(client_fd, message);
 			if(send_bytes == -1) {
 				string mensError(strerror(errno));
@@ -195,6 +195,7 @@ int main(int argc, char *argv[]) {
 
 	thread th_inscripcion(&comenzarInscripcion);
 	thread th_administrador(&procesoAdministrador, ref(control));
+	thread th_estadistico(&estadistico, ref(control));
 	thread th_vallas(&procesoGestorVallas, ref(control));
 	for (int i=0; i<max_connections && control.seguirAceptando(); i++) {
 		// Accept
@@ -224,6 +225,7 @@ int main(int argc, char *argv[]) {
 	cout << "B" << endl;
 	control.avisarFinGestor();
 	cout << "C" << endl;
+	th_estadistico.join();
 	control.notifyCola();
 	cout << "D" << endl;
 	th_vallas.join();
