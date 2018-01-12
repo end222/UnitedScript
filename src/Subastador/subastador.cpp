@@ -22,10 +22,10 @@ using namespace std;
  */
 subasta::subasta(){
 	srand(time(NULL));
-	precioSalida=rand()%91+10; //Precio entre 10 y 100
-	tiempo=precioSalida/10;
-	precioDeReserva=precioSalida*3;
-	precioDeIncremento=precioSalida/2;
+	precioSalida=rand()%901+100; //Precio entre 10 y 100
+	tiempo=precioSalida/20;
+	precioDeReserva=precioSalida*1.5;
+	precioDeIncremento=precioSalida/1.5;
 	precioActual=precioSalida;
 }
 
@@ -39,10 +39,10 @@ subasta::subasta(){
  *		correspondiente al precio de salida.
  */
 void subasta::rehacer(){
-	precioSalida=rand()%91+10; //Precio entre 10 y 100
-	tiempo=precioSalida/10;
-	precioDeReserva=precioSalida*3;
-	precioDeIncremento=precioSalida/2;
+	precioSalida=rand()%901+100; //Precio entre 10 y 100
+	tiempo=precioSalida/20;
+	precioDeReserva=precioSalida*1.5;
+	precioDeIncremento=precioSalida/1.5;
 	precioActual=precioSalida;
 }
 

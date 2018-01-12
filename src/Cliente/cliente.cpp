@@ -79,6 +79,13 @@ int main(int argc, char * argv[]) {
 	string start = "START";
 
 	while(!haTerminado){
+		// Solo ejecuta de manera automatica las 3 primeras subastas
+		// En vez de terminar el cliente lo pasamos a modo manual para que no se cierren las terminales
+		// en las que se inician los clientes automáticos con el script para poder ver al final las
+		// respuestas que han dado
+		if(subasta == 4){
+			automatico = false;
+		}
 		int read_bytes = socket.Recv(socket_fd, buffer, MESSAGE_SIZE);
 		if(buffer == start){
 			finSubasta = false;
@@ -88,7 +95,7 @@ int main(int argc, char * argv[]) {
 				cout << "=============================" << endl;
 				cout << "SUBASTA " << subasta << endl;
 				cout << "RONDA " << ronda << endl;
-				cout << "Precio propuesto: " << buffer;
+				cout << "Precio propuesto: " << buffer << "€" << endl;
 				cout << "¿Acepta la propuesta? (si/no)" << endl;
 				cout << "=============================" << endl;
 				ronda++;

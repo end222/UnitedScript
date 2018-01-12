@@ -312,7 +312,7 @@ string Control::obtenerInfoSistema(){
 	informacion+="Numero de imagenes mostradas: "+to_string(totalEncolados-cola.size());
 	informacion+="\nTiempo total de imagenes mostradas: "+to_string(tiempoMostrado);
 	informacion+="\nTiempo medio de imagenes mostradas: "
-	+to_string((double)(totalEncolados-cola.size())/(double)tiempoMostrado);
+	+to_string((double)tiempoMostrado/(double)(totalEncolados-cola.size()));
 	informacion+="\n-----------------------------\nInformacion del estado del sistema\n\n";
 	informacion+="Numero de peticiones encoladas: "+to_string(cola.size());
 	informacion+="\nTiempo contratado estimado: "+to_string(tiempoEstimado);
