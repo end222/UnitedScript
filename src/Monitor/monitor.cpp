@@ -55,7 +55,6 @@ void Control::avisarFinGestor(){
  */
 bool Control::colaPop(datosValla& datos){
 	unique_lock<recursive_mutex> lck(colaMtx);
-	cout << cola.empty() << endl;
 	if(cola.empty() && !finGestor){
 		cv_cola.wait(lck);
 	}
@@ -347,4 +346,25 @@ bool Control::finSubastas(){
  */
 int Control::tamanoCola(){
 	return cola.size();
+}
+
+/*
+ * PRE: Se ha construido Control
+ * POST:
+ */
+void Control::saleAcepta(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx);
+	numPujadoresAceptan--;
+	numPujadoresActivos--;
+}
+
+void Control::saleRechaza(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx);
+	numPujadoresRechazan--;
+	numPujadoresActivos--;
+}
+
+void Control::saleSinElegir(){
+	unique_lock<recursive_mutex> lck(pujadoresMtx);
+	numPujadoresActivos--;
 }

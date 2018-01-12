@@ -61,8 +61,9 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 	char buffer[length];
 	string message;
 	string mostrarMens;
+	bool clienteDesconectado = false;
 
-	while(!control.finSubastas()){
+	while(!control.finSubastas() && !clienteDesconectado){
 
 		//Inicio de la subasta
 		message="START";
@@ -73,11 +74,13 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 			cerr << "Error al enviar datos: " + mensError + "\n";
 			// Cerramos los sockets
 			soc.Close(client_fd);
+			control.saleSinElegir();
+			clienteDesconectado = true;
 		}
 
 		bool finSubasta=false;
 
-		while(!finSubasta){
+		while(!finSubasta && !clienteDesconectado){
 			message=to_string(subastaActual.obtenerPrecioActual()); //Precio de la subasta
 			int send_bytes = soc.Send(client_fd, message);
 			if(send_bytes == -1) {
@@ -85,107 +88,133 @@ void servCliente(Socket& soc, int client_fd, int numCliente) {
 				cerr << "Error al enviar datos: " + mensError + "\n";
 				// Cerramos los sockets
 				soc.Close(client_fd);
+				control.saleSinElegir();
+				clienteDesconectado = true;
+				control.terminaRonda(subastaActual);
 			}
-
-
-			// Recibimos el mensaje del cliente
-			int rcv_bytes = soc.Recv(client_fd,buffer,length);
-			if (rcv_bytes == -1) {
-				string mensError(strerror(errno));
-				cerr << "Error al recibir datos: " + mensError + "\n";
-				// Cerramos los sockets
-				soc.Close(client_fd);
-			}
-
-			mostrarMens = "Mensaje recibido del cliente " + to_string(numCliente) + ": " + buffer;
-			control.mostrar(mostrarMens);
-
-			/*
-			 * Código:
-			 * 0: Ha rechazado
-			 * 1: Ha aceptado pero aún no ha ganado
-			 * 2: Ha aceptado, ha ganado, pero no llega al precio de reserva
-			 * 3: Ha aceptado, ha ganado y llega al precio de reserva
-			 */
-			if (0 == strcmp(buffer, MENS_OK)) {
-				control.anadirAcepta(subastaActual);
-
-				int numAceptan = control.numeroPujadoresAceptan();
-				if(numAceptan == 1){//Es el unico que queda
-					finSubasta = true; // Salir del bucle
-					if(subastaActual.obtenerPrecioActual()>=subastaActual.obtenerPrecioDeReserva()){
-						message="3"; //es el ganador
-					}
-					else{ // no consigue la subasta al no llegar al precio
-						message="2";
-						control.terminaRonda(subastaActual);
-						control.esperarFinSubasta();
-					}
-				}
-				else{
-					//Acepta pero NO es el último cliente
-					message="1";
-				}
-
-			}
-			//MENSAJE ANULADO
 			else{
-				//El cliente rechaza a voluntad la subasta
-				control.anadirRechaza(subastaActual);
-				finSubasta = true; // Salir del bucle
-				message="0";
-				if(control.numeroPujadoresAceptan()==0){
-					control.terminaRonda(subastaActual);
-					control.comprobarFin();
-					control.esperarFinSubasta();
-				}
-				else{
-					control.terminaRonda(subastaActual);
-					control.esperarFinSubasta();//Esperar a que todos terminen la subasta
-				}
-			}
-
-			send_bytes = soc.Send(client_fd, message);
-			if(send_bytes == -1) {
-				string mensError(strerror(errno));
-				cerr << "Error al enviar datos: " + mensError + "\n";
-				// Cerramos los sockets
-				soc.Close(client_fd);
-			}
-			if(message == "3"){
-				//mete en la cola los datos del cliente y la venta
-				rcv_bytes = soc.Recv(client_fd,buffer,length);
-				if (rcv_bytes == -1) {
+				// Recibimos el mensaje del cliente
+				int rcv_bytes = soc.Recv(client_fd,buffer,length);
+				// Tambien tiene que tener en cuenta que rcv_bytes sea igual a 0
+				// ya que es lo que se obtiene cuando el cliente hace un ctrl+c
+				if (rcv_bytes == -1 || rcv_bytes == 0) {
 					string mensError(strerror(errno));
 					cerr << "Error al recibir datos: " + mensError + "\n";
 					// Cerramos los sockets
 					soc.Close(client_fd);
+					control.saleSinElegir();
+					clienteDesconectado = true;
+					control.terminaRonda(subastaActual);
+				}
+				else{
+					mostrarMens = "Mensaje recibido del cliente " + to_string(numCliente) + ": " + buffer;
+					control.mostrar(mostrarMens);
+
+					/*
+					 * Código:
+					 * 0: Ha rechazado
+					 * 1: Ha aceptado pero aún no ha ganado
+					 * 2: Ha aceptado, ha ganado, pero no llega al precio de reserva
+					 * 3: Ha aceptado, ha ganado y llega al precio de reserva
+					 */
+					if (0 == strcmp(buffer, MENS_OK)) {
+						control.anadirAcepta(subastaActual);
+						int numAceptan = control.numeroPujadoresAceptan();
+						if(numAceptan == 1){//Es el unico que queda
+							finSubasta = true; // Salir del bucle
+							if(subastaActual.obtenerPrecioActual()>=subastaActual.obtenerPrecioDeReserva()){
+								message="3"; //es el ganador
+							}
+							else{ // no consigue la subasta al no llegar al precio
+								message="2";
+								control.terminaRonda(subastaActual);
+								control.esperarFinSubasta();
+							}
+						}
+						else{
+							//Acepta pero NO es el último cliente
+							message="1";
+						}
+
 					}
-				int tiempo = subastaActual.obtenerTiempo();
-				int precio = subastaActual.obtenerPrecioActual();
-				datosValla datos;
-				control.generaDatos(datos, numCliente, tiempo, precio, buffer);
-				control.colaPush(datos);
-				control.terminaRonda(subastaActual);
-				control.comprobarFin();
-				control.esperarFinSubasta();
-			}
-			else if(message == "1"){
-				control.terminaRonda(subastaActual);
+					//MENSAJE ANULADO
+					else{
+						//El cliente rechaza a voluntad la subasta
+						control.anadirRechaza(subastaActual);
+						finSubasta = true; // Salir del bucle
+						message="0";
+						if(control.numeroPujadoresAceptan()==0){
+							control.terminaRonda(subastaActual);
+							control.comprobarFin();
+							control.esperarFinSubasta();
+						}
+						else{
+							control.terminaRonda(subastaActual);
+							control.esperarFinSubasta();//Esperar a que todos terminen la subasta
+						}
+					}
+
+					send_bytes = soc.Send(client_fd, message);
+					if(send_bytes == -1) {
+						string mensError(strerror(errno));
+						cerr << "Error al enviar datos: " + mensError + "\n";
+						// Cerramos los sockets
+						soc.Close(client_fd);
+						clienteDesconectado = true;
+						if(message == "1" || message == "2" || message == "3"){
+							control.saleAcepta();
+							control.terminaRonda(subastaActual);
+						}
+						else{
+							control.saleRechaza();
+							control.terminaRonda(subastaActual);
+						}
+					}
+					else{
+						if(message == "3"){
+							//mete en la cola los datos del cliente y la venta
+							rcv_bytes = soc.Recv(client_fd,buffer,length);
+							if (rcv_bytes == -1 || rcv_bytes == 0) {
+								string mensError(strerror(errno));
+								cerr << "Error al recibir datos: " + mensError + "\n";
+								// Cerramos los sockets
+								soc.Close(client_fd);
+								control.terminaRonda(subastaActual);
+								control.comprobarFin();
+								control.esperarFinSubasta();
+							}
+							else{
+								int tiempo = subastaActual.obtenerTiempo();
+								int precio = subastaActual.obtenerPrecioActual();
+								datosValla datos;
+								control.generaDatos(datos, numCliente, tiempo, precio, buffer);
+								control.colaPush(datos);
+								control.terminaRonda(subastaActual);
+								control.comprobarFin();
+								control.esperarFinSubasta();
+							}
+						}
+						else if(message == "1"){
+							control.terminaRonda(subastaActual);
+						}
+					}
+				}
 			}
 		}
-
 	}
- 	message="END";
-	int send_bytes = soc.Send(client_fd, message);
-	if(send_bytes == -1) {
-		string mensError(strerror(errno));
-		cerr << "Error al enviar datos: " + mensError + "\n";
-		// Cerramos los sockets
+	if(!clienteDesconectado){
+ 		message="END";
+		int send_bytes = soc.Send(client_fd, message);
+		if(send_bytes == -1) {
+			string mensError(strerror(errno));
+			cerr << "Error al enviar datos: " + mensError + "\n";
+			// Cerramos los sockets
+			soc.Close(client_fd);
+		}
 		soc.Close(client_fd);
 	}
-	soc.Close(client_fd);
 }
+
 //-------------------------------------------------------------
 int main(int argc, char *argv[]) {
 	signal (SIGINT,controlc);

@@ -94,6 +94,7 @@ int main(int argc, char * argv[]) {
 				ronda++;
 				int send_bytes;
 				if(automatico){
+					this_thread::sleep_for(chrono::seconds(3));
 					opcion = rand()%2;
 					if(opcion == 0){
 						send_bytes = socket.Send(socket_fd, rechazar);
@@ -102,7 +103,6 @@ int main(int argc, char * argv[]) {
 						send_bytes = socket.Send(socket_fd, aceptar);
 					}
 					// Espera 3 segundos entre respuesta y respuesta para facilitar la visualizacion
-					this_thread::sleep_for(chrono::seconds(3));
 				}
 				else{
 					cin >> mensaje;

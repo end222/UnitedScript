@@ -51,6 +51,9 @@ class Control{
 		int tamanoCola();
 		void notifyCola();
 		int totalPujadores();
+		void saleAcepta();
+		void saleRechaza();
+		void saleSinElegir();
 	private:
 		const int RETARDO=10;
 		bool fin;
