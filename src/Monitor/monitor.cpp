@@ -350,7 +350,8 @@ int Control::tamanoCola(){
 
 /*
  * PRE: Se ha construido Control
- * POST:
+ * POST: numPujadoresAceptan--
+ * 	 numPujadoresActivos--
  */
 void Control::saleAcepta(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
@@ -358,12 +359,21 @@ void Control::saleAcepta(){
 	numPujadoresActivos--;
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST: numPujadoresRechazan--
+ * 	 numPujadoresActivos--
+ */
 void Control::saleRechaza(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	numPujadoresRechazan--;
 	numPujadoresActivos--;
 }
 
+/*
+ * PRE: Se ha construido Control
+ * POST: numPujadoresActivos--
+ */
 void Control::saleSinElegir(){
 	unique_lock<recursive_mutex> lck(pujadoresMtx);
 	numPujadoresActivos--;
