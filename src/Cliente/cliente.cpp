@@ -129,7 +129,6 @@ int main(int argc, char * argv[]) {
 				}
 
 				read_bytes = socket.Recv(socket_fd, buffer, MESSAGE_SIZE);
-				cout << buffer << endl;
 
 				/*
 				 * Código:

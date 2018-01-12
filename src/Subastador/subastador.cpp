@@ -15,14 +15,14 @@ using namespace std;
 /*
  * PRE:
  * POST: Construye una subasta, de tal forma que se establece un precio de salida
- *		aleatorio entre 10 y 100, un tiempo (segundos que se mostrará la imagen)
+ *		aleatorio entre 100 y 1000, un tiempo (segundos que se mostrará la imagen)
  *		equivalentes a una décima parte del precio de salida, un precio de reserva
  *		el triple que el precio de salida, un precio de incremento la mitad del
  *		precio de salida, y un precio actual correspondiente al precio de salida.
  */
 subasta::subasta(){
 	srand(time(NULL));
-	precioSalida=rand()%901+100; //Precio entre 10 y 100
+	precioSalida=rand()%901+100; //Precio entre 100 y 1000
 	tiempo=precioSalida/20;
 	precioDeReserva=precioSalida*1.5;
 	precioDeIncremento=precioSalida/1.5;
@@ -32,14 +32,14 @@ subasta::subasta(){
 /*
  * PRE:
  * POST: Se rehace la subasta construida previamente, de tal forma que se
- *		establece un precio de salida aleatorio entre 10 y 100, un tiempo
+ *		establece un precio de salida aleatorio entre 100 y 1000, un tiempo
  *		(segundos que se mostrará la imagen) equivalentes a una décima parte del
  *		precio de salida, un precio de reserva el triple que el precio de salida,
  *		un precio de incremento la mitad del precio de salida, y un precio actual
  *		correspondiente al precio de salida.
  */
 void subasta::rehacer(){
-	precioSalida=rand()%901+100; //Precio entre 10 y 100
+	precioSalida=rand()%901+100; //Precio entre 100 y 1000
 	tiempo=precioSalida/20;
 	precioDeReserva=precioSalida*1.5;
 	precioDeIncremento=precioSalida/1.5;
