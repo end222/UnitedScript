@@ -1,0 +1,51 @@
+NIP     APELLIDOS           NOMBRE
+---------------------------------
+739274  NAVAL ALCALÁ        DANIEL
+741294  PEÑASCO ESTÍVALEZ   VÍCTOR MIGUEL
+741297  ORDUNA LAGARMA      PABLO
+
+INFORME DE DEDICACIÓN
+---------------------------------
+NOTA: El trabajo se ha realizado en todo momento y de forma presencial contando con todos los integrantes del grupo, en consecuencia los tiempos invertidos son muy similares y hemos optado por la unificación temporal. 
+
+*DÍA 28/01/2018
+DANIEL & VÍCTOR & PABLO 
+Entre todos se organiza el espacio de trabajo a utilizar configurando repositorios, creando módulos, repartiendo tareas y analizando el enunciado del trabajo.
+TIEMPO DEDICADO: 1:00 horas
+
+*DÍA 02/01/2018
+DANIEL & VÍCTOR & PABLO
+Se comienzan los primeros módulos del proyecto, PABLO termina el módulo de gestión de vallas, VÍCTOR analiza y comienza el sistema administrador y DANIEL analiza y comienza el sistema de subastas.
+Tras una decisión de reorganización entre todos los integrantes se decide trabajar conjuntamente en el módulo de subastas.
+TIEMPO DEDICADO: 3:30 horas
+
+*DÍA 03/01/2018
+DANIEL & VÍCTOR & PABLO
+PABLO continúa el diseño del módulo del monitor  mientras DANIEL Y VÍCTOR analizan detenidamente el sistema de la FIPA para esablecer un diseño cliente-sevidor fijo a utilizar.
+TIEMPO DEDICADO: 3:00 horas
+
+*DÍA 05/01/2018
+Continuamos entre todos de forma paralela diseñando y creando el servidor y los módulos del subastador y monitor.
+Con gran parte del código implementado para comenzar a realizar una subasta cliente y servidor PABLO compila y elimina fallos que muestran una primera pantalla simple de funcionamiento de la subasta. 
+TIEMPO DEDICADO: 5:00 horas
+
+*DÍA 08/01/2018
+Partiendo de la base del día anterior se trata de eliminar fallos de diseño e implementar el sistema de subasta mejorado, modificando muchos módulos.
+El sistema de subastas mejora.
+TIEMPO DEDICADO: 4:30 horas
+
+*DÍA 09/01/2018
+Se siguien puliendo detalles de la subasta y buscando un diseño más eficiente para algunas operaciones.
+Se comienzan a mostrar imágenes correctamente lo que significa la correcta sincronización entre módulos.
+TIEMPO DEDICADO: 4:30 horas
+
+*DÍA 09/01/2018
+VÍCTOR comienza con la documentación del código mientras PABLO y DANIEL realizan diversas pruebas y modificaciones en el código principal y módulos de gestión de subasta para implementar y corregir detalles de la conexión. El sistema básico parece funcionar ya correctamente.
+TIEMPO DEDICADO: 4:30 horas
+
+*DÍA 10/01/2018
+VÍCTOR continúa con la documentación del código, DANIEL comienza a redactar los documentos necesarios de entrega y PABLO añade sistemas de seguridad en el servidor que preveen desconexiones del cliente y una cancelación adecuada del servidor.
+Entre todos probamos desde diferentes máquinas el funcionamiento del sistema.
+TIEMPO DEDICADO: 5:00 horas
+
+*DÍA 11/01/2018
