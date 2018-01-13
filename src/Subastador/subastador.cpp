@@ -16,9 +16,9 @@ using namespace std;
  * PRE:
  * POST: Construye una subasta, de tal forma que se establece un precio de salida
  *		aleatorio entre 100 y 1000, un tiempo (segundos que se mostrará la imagen)
- *		equivalentes a una décima parte del precio de salida, un precio de reserva
- *		el triple que el precio de salida, un precio de incremento la mitad del
- *		precio de salida, y un precio actual correspondiente al precio de salida.
+ *		equivalentes a una vigésima parte del precio de salida, un precio de reserva
+ *		el 50% más que el precio de salida, un precio de incremento del
+ *		precio de salida/1.5, y un precio actual correspondiente al precio de salida.
  */
 subasta::subasta(){
 	srand(time(NULL));
@@ -33,9 +33,9 @@ subasta::subasta(){
  * PRE:
  * POST: Se rehace la subasta construida previamente, de tal forma que se
  *		establece un precio de salida aleatorio entre 100 y 1000, un tiempo
- *		(segundos que se mostrará la imagen) equivalentes a una décima parte del
- *		precio de salida, un precio de reserva el triple que el precio de salida,
- *		un precio de incremento la mitad del precio de salida, y un precio actual
+ *		(segundos que se mostrará la imagen) equivalentes a una vigésima parte del
+ *		precio de salida, un precio de reserva el 50% más que el precio de salida,
+ *		un precio de incremento del precio de salida/1.5, y un precio actual
  *		correspondiente al precio de salida.
  */
 void subasta::rehacer(){

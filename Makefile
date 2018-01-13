@@ -15,7 +15,10 @@ imageDownloader=Imagen/ImageDownloader
 #
 CPPFLAGS=-I. -I/usr/local/include -O2 -std=c++11 -Werror
 LDFLAGS=-L/usr/X11R6/lib -L/usr/local/lib -lm -pthread -lcurl -lX11 
-
+UNAME := $(shell uname)
+ifeq ($(UNAME), SunOS) # hendrix
+	LDFLAGS=-L/usr/X11R6/lib -L/usr/local/lib -lm -pthread -lcurl -lX11 -lsocket -lnsl -lrt
+endif
 .PHONY:all
 
 all: ${target}
