@@ -7,11 +7,7 @@
 #*****************************************************************
 
 RM = rm -rf
-UNAME := $(shell uname)
 CC=g++
-ifeq ($(UNAME), FreeBSD) #eeePC
-	CC = c++
-endif
 MAIN=main
 target=${MAIN}
 imageDownloader=Imagen/ImageDownloader
